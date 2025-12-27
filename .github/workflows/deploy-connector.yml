@@ -1,0 +1,260 @@
+name: Deploy Connector to Power Platform
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
+          - forit-default
+          - forit-portal
+          - all
+      action:
+        description: 'Deployment action'
+        required: true
+        default: 'update'
+        type: choice
+        options:
+          - create
+          - update
+
+  push:
+    branches: [main, master]
+    paths:
+      - 'claude-connector.json'
+      - 'apiProperties.json'
+
+  release:
+    types: [published]
+
+env:
+  CONNECTOR_FILE: claude-connector.json
+  PROPERTIES_FILE: apiProperties.json
+
+jobs:
+  validate:
+    name: Validate Connector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run validation tests
+        run: npm test
+
+      - name: Validate JSON syntax
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('${{ env.CONNECTOR_FILE }}'))"
+          echo "Valid JSON"
+
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'development' || github.event.inputs.environment == 'all'))
+    environment:
+      name: development
+      url: ${{ vars.POWER_PLATFORM_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      - name: Authenticate
+        run: |
+          $POWERPLATFORMTOOLS_PACPATH auth create \
+            --name deploy \
+            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
+            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
+            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
+            --accept-cleartext-caching
+
+      - name: Deploy Connector
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "create" ]; then
+            $POWERPLATFORMTOOLS_PACPATH connector create \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          else
+            $POWERPLATFORMTOOLS_PACPATH connector update \
+              --connector-id ${{ vars.CONNECTOR_ID }} \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Development Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
+
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' || github.event.inputs.environment == 'all'))
+    environment:
+      name: production
+      url: ${{ vars.POWER_PLATFORM_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      - name: Authenticate
+        run: |
+          $POWERPLATFORMTOOLS_PACPATH auth create \
+            --name deploy \
+            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
+            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
+            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
+            --accept-cleartext-caching
+
+      - name: Deploy Connector
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "create" ]; then
+            $POWERPLATFORMTOOLS_PACPATH connector create \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          else
+            $POWERPLATFORMTOOLS_PACPATH connector update \
+              --connector-id ${{ vars.CONNECTOR_ID }} \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
+
+  deploy-forit-default:
+    name: Deploy to ForIT Default
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'forit-default' || github.event.inputs.environment == 'all')
+    environment:
+      name: forit-default
+      url: ${{ vars.POWER_PLATFORM_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      - name: Authenticate
+        run: |
+          $POWERPLATFORMTOOLS_PACPATH auth create \
+            --name deploy \
+            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
+            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
+            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
+            --accept-cleartext-caching
+
+      - name: Deploy Connector
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "create" ]; then
+            $POWERPLATFORMTOOLS_PACPATH connector create \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          else
+            $POWERPLATFORMTOOLS_PACPATH connector update \
+              --connector-id ${{ vars.CONNECTOR_ID }} \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          fi
+
+      - name: Summary
+        run: |
+          echo "## ForIT Default Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
+
+  deploy-forit-portal:
+    name: Deploy to ForIT Portal
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'forit-portal' || github.event.inputs.environment == 'all')
+    environment:
+      name: forit-portal
+      url: ${{ vars.POWER_PLATFORM_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+
+      - name: Authenticate
+        run: |
+          $POWERPLATFORMTOOLS_PACPATH auth create \
+            --name deploy \
+            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
+            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
+            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
+            --accept-cleartext-caching
+
+      - name: Deploy Connector
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "create" ]; then
+            $POWERPLATFORMTOOLS_PACPATH connector create \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          else
+            $POWERPLATFORMTOOLS_PACPATH connector update \
+              --connector-id ${{ vars.CONNECTOR_ID }} \
+              --api-definition-file ${{ env.CONNECTOR_FILE }} \
+              --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --environment ${{ vars.POWER_PLATFORM_URL }}
+          fi
+
+      - name: Summary
+        run: |
+          echo "## ForIT Portal Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
+
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-dev, deploy-prod, deploy-forit-default, deploy-forit-portal]
+    if: failure()
+    steps:
+      - name: Log failure
+        run: |
+          echo "## Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "Check workflow logs for details." >> $GITHUB_STEP_SUMMARY

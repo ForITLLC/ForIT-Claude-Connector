@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "API Key",
+          "description": "Your Anthropic API Key from console.anthropic.com",
+          "tooltip": "Enter your Anthropic API key",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 1
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#D4A27F",
+    "capabilities": [],
+    "publisher": "ForIT",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set Anthropic Version Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "anthropic-version",
+          "x-ms-apimTemplateParameter.value": "2023-06-01",
+          "x-ms-apimTemplateParameter.existsAction": "skip"
+        }
+      }
+    ]
+  }
+}

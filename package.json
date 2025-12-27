@@ -1,0 +1,29 @@
+{
+  "name": "forit-claude-connector",
+  "version": "1.0.0",
+  "description": "Power Platform custom connector for Anthropic Claude API",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests/validate-connector.js",
+    "validate": "node tests/validate-connector.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForITLLC/ForIT-Claude-Connector.git"
+  },
+  "keywords": [
+    "power-platform",
+    "custom-connector",
+    "anthropic",
+    "claude",
+    "ai",
+    "power-automate"
+  ],
+  "author": "ForIT LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ForITLLC/ForIT-Claude-Connector/issues"
+  },
+  "homepage": "https://github.com/ForITLLC/ForIT-Claude-Connector#readme",
+  "devDependencies": {}
+}
