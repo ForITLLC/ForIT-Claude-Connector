@@ -150,6 +150,49 @@ This connector incorporates lessons from ForIT-Xero-Connector:
 4. **Multiple environments** - CI/CD supports dev, prod, and custom environments
 5. **API key auth is simpler** - No OAuth redirect URLs to manage
 
+## Next Steps
+
+### 1. Create GitHub Repository
+
+```bash
+cd /Users/benjaminwesleythomas/GitProjects/ForIT-Claude-Connector
+gh repo create ForITLLC/ForIT-Claude-Connector --public --source . --push
+```
+
+### 2. Configure GitHub Environments
+
+Create these environments in GitHub repo settings: `development`, `production`, `forit-default`, `forit-portal`
+
+**Secrets (per environment):**
+| Secret | Description |
+|--------|-------------|
+| `POWER_PLATFORM_APP_ID` | Azure AD app registration ID |
+| `POWER_PLATFORM_CLIENT_SECRET` | Azure AD app secret |
+| `POWER_PLATFORM_TENANT_ID` | Azure AD tenant ID |
+
+**Variables (per environment):**
+| Variable | Example |
+|----------|---------|
+| `POWER_PLATFORM_URL` | `https://org.crm.dynamics.com` |
+| `CONNECTOR_ID` | Set after first deployment |
+
+### 3. Deploy to All Environments
+
+```bash
+gh workflow run "Deploy Connector to Power Platform" -f environment=all -f action=create
+```
+
+### 4. Get Connector IDs
+
+After deployment, get the connector IDs from the workflow logs and update the `CONNECTOR_ID` variable in each environment.
+
+### 5. Test Connection
+
+1. Go to Power Automate > Data > Custom connectors
+2. Find "ForIT Claude Connector"
+3. Create a connection with your Anthropic API key
+4. Test the "Create Message" action
+
 ## License
 
 MIT
