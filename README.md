@@ -59,7 +59,7 @@ gh workflow run "Deploy Connector to Power Platform" -f environment=development 
 
 ```
 Action: Create Message
-Model: claude-sonnet-4-20250514
+Model: claude-opus-4-5-20251101
 Max Tokens: 1024
 Messages: [{"role": "user", "content": "Hello, Claude!"}]
 ```
@@ -68,7 +68,7 @@ Messages: [{"role": "user", "content": "Hello, Claude!"}]
 
 ```
 Action: Create Message
-Model: claude-sonnet-4-20250514
+Model: claude-opus-4-5-20251101
 Max Tokens: 2048
 System Prompt: "You are a helpful assistant that responds in JSON format."
 Messages: [{"role": "user", "content": "List 3 colors"}]
@@ -88,10 +88,9 @@ Messages: [
 
 | Model | Best For |
 |-------|----------|
-| claude-opus-4-20250514 | Complex reasoning, analysis |
-| claude-sonnet-4-20250514 | Balanced performance (recommended) |
-| claude-3-5-sonnet-20241022 | Previous generation balanced |
-| claude-3-5-haiku-20241022 | Fast, cost-effective |
+| claude-opus-4-5-20251101 | Most capable, complex reasoning (default) |
+| claude-sonnet-4-20250514 | Balanced performance |
+| claude-opus-4-20250514 | Complex reasoning |
 
 ## Rate Limits
 

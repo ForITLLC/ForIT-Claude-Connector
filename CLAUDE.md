@@ -38,7 +38,6 @@ Uses API key authentication (simpler than OAuth):
 
 ## Models
 
+- claude-opus-4-5-20251101 (most capable - default)
+- claude-sonnet-4-20250514 (balanced)
 - claude-opus-4-20250514 (complex reasoning)
-- claude-sonnet-4-20250514 (balanced - recommended)
-- claude-3-5-sonnet-20241022 (previous gen)
-- claude-3-5-haiku-20241022 (fast/cheap)
