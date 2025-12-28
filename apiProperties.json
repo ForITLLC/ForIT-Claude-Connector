@@ -24,7 +24,8 @@
         "parameters": {
           "x-ms-apimTemplateParameter.name": "anthropic-version",
           "x-ms-apimTemplateParameter.value": "2023-06-01",
-          "x-ms-apimTemplateParameter.existsAction": "skip"
+          "x-ms-apimTemplateParameter.existsAction": "skip",
+          "x-ms-apimTemplate-policySection": "Request"
         }
       }
     ]
