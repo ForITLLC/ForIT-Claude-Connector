@@ -138,6 +138,65 @@
                       "description": "External user identifier for abuse detection"
                     }
                   }
+                },
+                "tools": {
+                  "type": "array",
+                  "description": "Tools/functions that Claude can call",
+                  "x-ms-summary": "Tools",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Tool name (a-z, A-Z, 0-9, underscores)"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Detailed description of what the tool does"
+                      },
+                      "input_schema": {
+                        "type": "object",
+                        "description": "JSON Schema for tool parameters"
+                      }
+                    }
+                  }
+                },
+                "tool_choice": {
+                  "type": "object",
+                  "description": "How Claude should use tools",
+                  "x-ms-summary": "Tool Choice",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "auto (default), any (must use a tool), or tool (use specific tool)",
+                      "enum": ["auto", "any", "tool"]
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Tool name (required when type is 'tool')"
+                    },
+                    "disable_parallel_tool_use": {
+                      "type": "boolean",
+                      "description": "Prevent parallel tool calls"
+                    }
+                  }
+                },
+                "thinking": {
+                  "type": "object",
+                  "description": "Extended thinking configuration (Claude 4+ only)",
+                  "x-ms-summary": "Extended Thinking",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["enabled"],
+                      "default": "enabled"
+                    },
+                    "budget_tokens": {
+                      "type": "integer",
+                      "description": "Max tokens for thinking (1024-100000)",
+                      "minimum": 1024
+                    }
+                  }
                 }
               }
             }
@@ -170,12 +229,32 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "description": "Content block type"
+                        "description": "Content block type (text, tool_use, thinking)",
+                        "x-ms-summary": "Block Type"
                       },
                       "text": {
                         "type": "string",
-                        "description": "Text content of the response",
+                        "description": "Text content (when type=text)",
                         "x-ms-summary": "Response Text"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "Tool use ID (when type=tool_use)"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Tool name (when type=tool_use)",
+                        "x-ms-summary": "Tool Name"
+                      },
+                      "input": {
+                        "type": "object",
+                        "description": "Tool input parameters (when type=tool_use)",
+                        "x-ms-summary": "Tool Input"
+                      },
+                      "thinking": {
+                        "type": "string",
+                        "description": "Thinking content (when type=thinking)",
+                        "x-ms-summary": "Thinking"
                       }
                     }
                   }
