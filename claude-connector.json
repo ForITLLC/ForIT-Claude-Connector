@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.1",
+    "version": "2.6.2",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -226,7 +226,7 @@
     "/messages/count_tokens": {
       "post": {
         "operationId": "CountTokens",
-        "summary": "Count Tokens",
+        "summary": "Count Tokens (Advanced)",
         "description": "Count tokens before sending to estimate costs.",
         "x-ms-visibility": "advanced",
         "parameters": [
