@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -78,98 +78,22 @@
                   "enum": ["", "Respond only with valid JSON."],
                   "default": "",
                   "x-ms-visibility": "advanced"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "response": { "type": "string", "x-ms-summary": "Response" },
-                "id": { "type": "string", "x-ms-summary": "Message ID", "x-ms-visibility": "advanced" },
-                "model": { "type": "string", "x-ms-summary": "Model", "x-ms-visibility": "advanced" },
-                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason", "x-ms-visibility": "advanced" },
-                "usage": {
-                  "type": "object",
-                  "x-ms-summary": "Usage",
-                  "x-ms-visibility": "advanced",
-                  "properties": {
-                    "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
-                    "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
-                  }
-                }
-              }
-            }
-          },
-          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
-          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
-          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
-          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
-        }
-      }
-    },
-    "/messages?thinking": {
-      "post": {
-        "operationId": "AskClaudeWithThinking",
-        "summary": "Ask Claude with Thinking",
-        "description": "Claude reasons through the problem before responding. Best for complex tasks.",
-        "x-ms-visibility": "important",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["model", "max_tokens", "prompt", "thinking"],
-              "properties": {
-                "model": {
-                  "type": "string",
-                  "description": "Claude 4.5 model",
-                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
-                  "default": "claude-sonnet-4-5-20250929",
-                  "x-ms-summary": "Model"
                 },
-                "max_tokens": {
+                "enable_thinking": {
+                  "type": "boolean",
+                  "description": "Enable extended thinking for complex reasoning tasks",
+                  "x-ms-summary": "Enable Thinking",
+                  "default": false,
+                  "x-ms-visibility": "advanced"
+                },
+                "thinking_budget": {
                   "type": "integer",
-                  "default": 16000,
-                  "x-ms-visibility": "internal"
-                },
-                "prompt": {
-                  "type": "string",
-                  "description": "Your question for Claude",
-                  "x-ms-summary": "Prompt"
-                },
-                "thinking": {
-                  "type": "object",
-                  "required": ["type", "budget_tokens"],
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "default": "enabled",
-                      "x-ms-visibility": "internal"
-                    },
-                    "budget_tokens": {
-                      "type": "integer",
-                      "description": "Token budget for reasoning (10000-128000)",
-                      "x-ms-summary": "Thinking Budget",
-                      "default": 10000,
-                      "minimum": 1024,
-                      "maximum": 128000
-                    }
-                  }
+                  "description": "Token budget for reasoning (1024-128000). Only used if Enable Thinking is true.",
+                  "x-ms-summary": "Thinking Budget",
+                  "default": 10000,
+                  "minimum": 1024,
+                  "maximum": 128000,
+                  "x-ms-visibility": "advanced"
                 }
               }
             }
@@ -182,7 +106,7 @@
               "type": "object",
               "properties": {
                 "response": { "type": "string", "x-ms-summary": "Response" },
-                "thinking_output": { "type": "string", "x-ms-summary": "Thinking" },
+                "thinking_output": { "type": "string", "x-ms-summary": "Thinking", "x-ms-visibility": "advanced" },
                 "id": { "type": "string", "x-ms-summary": "Message ID", "x-ms-visibility": "advanced" },
                 "model": { "type": "string", "x-ms-summary": "Model", "x-ms-visibility": "advanced" },
                 "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason", "x-ms-visibility": "advanced" },

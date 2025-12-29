@@ -30,6 +30,6 @@
         }
       }
     ],
-    "scriptOperations": ["AskClaude", "AskClaudeWithThinking"]
+    "scriptOperations": ["AskClaude"]
   }
 }

@@ -11,7 +11,7 @@ public class Script : ScriptBase
     public override async Task<HttpResponseMessage> ExecuteAsync()
     {
         // Handle AskClaude - transform simple prompt to messages array
-        if (this.Context.OperationId == "AskClaude" || this.Context.OperationId == "AskClaudeWithThinking")
+        if (this.Context.OperationId == "AskClaude")
         {
             return await this.TransformPromptToMessages().ConfigureAwait(false);
         }
@@ -47,6 +47,31 @@ public class Script : ScriptBase
             // Replace prompt with messages array
             body.Remove("prompt");
             body["messages"] = messages;
+        }
+
+        // Handle enable_thinking and thinking_budget
+        bool enableThinking = body["enable_thinking"]?.Value<bool>() ?? false;
+        int thinkingBudget = body["thinking_budget"]?.Value<int>() ?? 10000;
+
+        // Remove our custom fields (not part of Claude API)
+        body.Remove("enable_thinking");
+        body.Remove("thinking_budget");
+
+        if (enableThinking)
+        {
+            // Build thinking object for Claude API
+            body["thinking"] = new JObject
+            {
+                ["type"] = "enabled",
+                ["budget_tokens"] = thinkingBudget
+            };
+
+            // Ensure max_tokens is sufficient for thinking
+            int maxTokens = body["max_tokens"]?.Value<int>() ?? 4096;
+            if (maxTokens < thinkingBudget + 4096)
+            {
+                body["max_tokens"] = thinkingBudget + 4096;
+            }
         }
 
         // Update request content with transformed body
