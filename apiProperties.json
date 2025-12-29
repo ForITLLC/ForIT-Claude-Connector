@@ -29,6 +29,7 @@
           "x-ms-apimTemplate-policySection": "Request"
         }
       }
-    ]
+    ],
+    "scriptOperations": ["AskClaude", "AskClaudeWithThinking"]
   }
 }

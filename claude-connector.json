@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.5.1",
+    "version": "2.6.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -52,7 +52,7 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["model", "max_tokens", "messages"],
+              "required": ["model", "max_tokens", "prompt"],
               "properties": {
                 "model": {
                   "type": "string",
@@ -66,24 +66,10 @@
                   "default": 4096,
                   "x-ms-visibility": "internal"
                 },
-                "messages": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": ["role", "content"],
-                    "properties": {
-                      "role": {
-                        "type": "string",
-                        "default": "user",
-                        "x-ms-visibility": "internal"
-                      },
-                      "content": {
-                        "type": "string",
-                        "description": "Your question for Claude",
-                        "x-ms-summary": "Prompt"
-                      }
-                    }
-                  }
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question for Claude",
+                  "x-ms-summary": "Prompt"
                 },
                 "system": {
                   "type": "string",
@@ -92,16 +78,86 @@
                   "enum": ["", "Respond only with valid JSON."],
                   "default": "",
                   "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": { "type": "string", "x-ms-summary": "Response" },
+                "id": { "type": "string", "x-ms-summary": "Message ID", "x-ms-visibility": "advanced" },
+                "model": { "type": "string", "x-ms-summary": "Model", "x-ms-visibility": "advanced" },
+                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason", "x-ms-visibility": "advanced" },
+                "usage": {
+                  "type": "object",
+                  "x-ms-summary": "Usage",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
+                    "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    },
+    "/messages?thinking": {
+      "post": {
+        "operationId": "AskClaudeWithThinking",
+        "summary": "Ask Claude with Thinking",
+        "description": "Claude reasons through the problem before responding. Best for complex tasks.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["model", "max_tokens", "prompt", "thinking"],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "Claude 4.5 model",
+                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
+                  "default": "claude-sonnet-4-5-20250929",
+                  "x-ms-summary": "Model"
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "default": 16000,
+                  "x-ms-visibility": "internal"
+                },
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question for Claude",
+                  "x-ms-summary": "Prompt"
                 },
                 "thinking": {
                   "type": "object",
-                  "description": "Enable extended thinking mode",
-                  "x-ms-summary": "Extended Thinking",
-                  "x-ms-visibility": "advanced",
+                  "required": ["type", "budget_tokens"],
                   "properties": {
                     "type": {
                       "type": "string",
-                      "enum": ["enabled"],
                       "default": "enabled",
                       "x-ms-visibility": "internal"
                     },
@@ -125,24 +181,15 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": { "type": "string", "x-ms-summary": "Message ID" },
-                "content": {
-                  "type": "array",
-                  "x-ms-summary": "Content",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "type": { "type": "string", "x-ms-summary": "Content Type" },
-                      "text": { "type": "string", "x-ms-summary": "Response" },
-                      "thinking": { "type": "string", "x-ms-summary": "Thinking" }
-                    }
-                  }
-                },
-                "model": { "type": "string", "x-ms-summary": "Model" },
-                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason" },
+                "response": { "type": "string", "x-ms-summary": "Response" },
+                "thinking_output": { "type": "string", "x-ms-summary": "Thinking" },
+                "id": { "type": "string", "x-ms-summary": "Message ID", "x-ms-visibility": "advanced" },
+                "model": { "type": "string", "x-ms-summary": "Model", "x-ms-visibility": "advanced" },
+                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason", "x-ms-visibility": "advanced" },
                 "usage": {
                   "type": "object",
                   "x-ms-summary": "Usage",
+                  "x-ms-visibility": "advanced",
                   "properties": {
                     "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
                     "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
