@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.2",
+    "version": "2.6.3",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"

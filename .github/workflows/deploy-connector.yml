@@ -28,6 +28,7 @@ on:
     paths:
       - 'claude-connector.json'
       - 'apiProperties.json'
+      - 'script.csx'
 
   release:
     types: [published]
@@ -35,6 +36,7 @@ on:
 env:
   CONNECTOR_FILE: claude-connector.json
   PROPERTIES_FILE: apiProperties.json
+  SCRIPT_FILE: script.csx
 
 jobs:
   validate:
@@ -90,12 +92,14 @@ jobs:
             $POWERPLATFORMTOOLS_PACPATH connector create \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
               --connector-id ${{ vars.CONNECTOR_ID }} \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           fi
 
@@ -137,12 +141,14 @@ jobs:
             $POWERPLATFORMTOOLS_PACPATH connector create \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
               --connector-id ${{ vars.CONNECTOR_ID }} \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           fi
 
@@ -184,12 +190,14 @@ jobs:
             $POWERPLATFORMTOOLS_PACPATH connector create \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
               --connector-id ${{ vars.CONNECTOR_ID }} \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           fi
 
@@ -231,12 +239,14 @@ jobs:
             $POWERPLATFORMTOOLS_PACPATH connector create \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
               --connector-id ${{ vars.CONNECTOR_ID }} \
               --api-definition-file ${{ env.CONNECTOR_FILE }} \
               --api-properties-file ${{ env.PROPERTIES_FILE }} \
+              --script-file ${{ env.SCRIPT_FILE }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           fi
 
