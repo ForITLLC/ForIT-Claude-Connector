@@ -19,10 +19,11 @@ ForIT-Claude-Connector/
 
 ## Key Learnings (from ForIT-Xero-Connector)
 
-1. **No scripts/icons in PAC CLI** - Including --script-file or --icon-file causes BlobNotFound errors
-2. **OpenAPI 2.0 required** - Power Platform doesn't support OpenAPI 3.0
-3. **Include error responses** - Always add 400, 401, 429, 500 responses to operations
-4. **API key auth is simpler** - No OAuth redirect URLs to manage (unlike Xero)
+1. **No --icon-file in PAC CLI** - Including --icon-file causes BlobNotFound errors
+2. **Icons must be set manually** - Create the connector, then set icon via Power Platform portal. The base64 icon in apiProperties.json is NOT automatically uploaded to blob storage by PAC CLI.
+3. **OpenAPI 2.0 required** - Power Platform doesn't support OpenAPI 3.0
+4. **Include error responses** - Always add 400, 401, 429, 500 responses to operations
+5. **API key auth is simpler** - No OAuth redirect URLs to manage (unlike Xero)
 
 ## Deployment
 
