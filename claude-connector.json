@@ -53,8 +53,8 @@
                 "model": {
                   "type": "string",
                   "description": "Claude 4.5 Opus",
-                  "enum": ["claude-opus-4-5-20251101"],
-                  "default": "claude-opus-4-5-20251101",
+                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
+                  "default": "claude-sonnet-4-5-20250929",
                   "x-ms-summary": "Model",
                   "x-ms-visibility": "internal"
                 },
@@ -155,8 +155,8 @@
                 "model": {
                   "type": "string",
                   "description": "Claude 4.5 Opus",
-                  "enum": ["claude-opus-4-5-20251101"],
-                  "default": "claude-opus-4-5-20251101",
+                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
+                  "default": "claude-sonnet-4-5-20250929",
                   "x-ms-summary": "Model"
                 },
                 "messages": {
@@ -246,7 +246,7 @@
               "type": "object",
               "required": ["model", "messages"],
               "properties": {
-                "model": { "type": "string", "enum": ["claude-opus-4-5-20251101"], "default": "claude-opus-4-5-20251101", "x-ms-summary": "Model" },
+                "model": { "type": "string", "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"], "default": "claude-sonnet-4-5-20250929", "x-ms-summary": "Model" },
                 "messages": {
                   "type": "array",
                   "x-ms-summary": "Messages",
@@ -320,7 +320,7 @@
                         "type": "object",
                         "x-ms-summary": "Request Parameters",
                         "properties": {
-                          "model": { "type": "string", "enum": ["claude-opus-4-5-20251101"], "default": "claude-opus-4-5-20251101", "x-ms-summary": "Model" },
+                          "model": { "type": "string", "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"], "default": "claude-sonnet-4-5-20250929", "x-ms-summary": "Model" },
                           "max_tokens": { "type": "integer", "default": 1024, "x-ms-summary": "Max Tokens" },
                           "messages": {
                             "type": "array",
