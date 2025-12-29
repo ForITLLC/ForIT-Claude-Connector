@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "title": "ForIT Claude Connector",
-    "description": "Enterprise-grade Power Automate connector for Anthropic's Claude API. Create messages, manage conversations, and leverage Claude's advanced AI capabilities in your workflows.",
-    "version": "1.0.0",
+    "description": "Power Automate connector for Anthropic's Claude API.",
+    "version": "2.0.1",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -25,17 +25,13 @@
       "description": "Anthropic API Key"
     }
   },
-  "security": [
-    {
-      "api_key": []
-    }
-  ],
+  "security": [{ "api_key": [] }],
   "paths": {
     "/messages": {
       "post": {
-        "operationId": "CreateMessage",
-        "summary": "Create a Message",
-        "description": "Send a message to Claude and receive a response. Supports text, images, and tool use.",
+        "operationId": "AskClaude",
+        "summary": "Ask Claude",
+        "description": "Send a prompt to Claude and get a response.",
         "x-ms-visibility": "important",
         "parameters": [
           {
@@ -44,8 +40,7 @@
             "required": true,
             "type": "string",
             "default": "2023-06-01",
-            "x-ms-visibility": "internal",
-            "description": "Anthropic API version"
+            "x-ms-visibility": "internal"
           },
           {
             "name": "body",
@@ -57,26 +52,18 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "The model to use for the response",
+                  "description": "Which Claude model to use",
                   "enum": [
-                    "claude-opus-4-5-20251101",
                     "claude-sonnet-4-20250514",
+                    "claude-opus-4-5-20251101",
                     "claude-opus-4-20250514"
                   ],
-                  "default": "claude-opus-4-5-20251101",
+                  "default": "claude-sonnet-4-20250514",
                   "x-ms-summary": "Model"
-                },
-                "max_tokens": {
-                  "type": "integer",
-                  "description": "Maximum number of tokens to generate (1-4096)",
-                  "default": 1024,
-                  "minimum": 1,
-                  "maximum": 8192,
-                  "x-ms-summary": "Max Tokens"
                 },
                 "messages": {
                   "type": "array",
-                  "description": "Array of messages in the conversation",
+                  "description": "Your prompt to Claude",
                   "x-ms-summary": "Messages",
                   "items": {
                     "type": "object",
@@ -85,118 +72,37 @@
                       "role": {
                         "type": "string",
                         "enum": ["user", "assistant"],
-                        "description": "The role of the message sender"
+                        "default": "user",
+                        "x-ms-summary": "Role"
                       },
                       "content": {
                         "type": "string",
-                        "description": "The message content"
+                        "description": "The message text",
+                        "x-ms-summary": "Content"
                       }
                     }
                   }
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "Maximum response length",
+                  "default": 1024,
+                  "x-ms-summary": "Max Tokens",
+                  "x-ms-visibility": "advanced"
                 },
                 "system": {
                   "type": "string",
-                  "description": "System prompt to set context for the conversation",
-                  "x-ms-summary": "System Prompt"
+                  "description": "Instructions for Claude's behavior",
+                  "x-ms-summary": "System Prompt",
+                  "x-ms-visibility": "advanced"
                 },
                 "temperature": {
                   "type": "number",
-                  "description": "Randomness of response (0-1). Lower is more deterministic.",
+                  "description": "Randomness 0-1 (lower = more deterministic)",
                   "minimum": 0,
                   "maximum": 1,
-                  "default": 1,
-                  "x-ms-summary": "Temperature"
-                },
-                "top_p": {
-                  "type": "number",
-                  "description": "Nucleus sampling parameter (0-1)",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "x-ms-summary": "Top P"
-                },
-                "top_k": {
-                  "type": "integer",
-                  "description": "Only sample from top K tokens",
-                  "minimum": 1,
-                  "x-ms-summary": "Top K"
-                },
-                "stop_sequences": {
-                  "type": "array",
-                  "description": "Sequences that will stop generation",
-                  "x-ms-summary": "Stop Sequences",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "metadata": {
-                  "type": "object",
-                  "description": "Custom metadata for the request",
-                  "x-ms-summary": "Metadata",
-                  "properties": {
-                    "user_id": {
-                      "type": "string",
-                      "description": "External user identifier for abuse detection"
-                    }
-                  }
-                },
-                "tools": {
-                  "type": "array",
-                  "description": "Tools/functions that Claude can call",
-                  "x-ms-summary": "Tools",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string",
-                        "description": "Tool name (a-z, A-Z, 0-9, underscores)"
-                      },
-                      "description": {
-                        "type": "string",
-                        "description": "Detailed description of what the tool does"
-                      },
-                      "input_schema": {
-                        "type": "object",
-                        "description": "JSON Schema for tool parameters"
-                      }
-                    }
-                  }
-                },
-                "tool_choice": {
-                  "type": "object",
-                  "description": "How Claude should use tools",
-                  "x-ms-summary": "Tool Choice",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "auto (default), any (must use a tool), or tool (use specific tool)",
-                      "enum": ["auto", "any", "tool"]
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Tool name (required when type is 'tool')"
-                    },
-                    "disable_parallel_tool_use": {
-                      "type": "boolean",
-                      "description": "Prevent parallel tool calls"
-                    }
-                  }
-                },
-                "thinking": {
-                  "type": "object",
-                  "description": "Extended thinking configuration (Claude 4+ only)",
-                  "x-ms-summary": "Extended Thinking",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": ["enabled"],
-                      "default": "enabled"
-                    },
-                    "budget_tokens": {
-                      "type": "integer",
-                      "description": "Max tokens for thinking (1024-100000)",
-                      "minimum": 1024
-                    }
-                  }
+                  "x-ms-summary": "Temperature",
+                  "x-ms-visibility": "advanced"
                 }
               }
             }
@@ -204,86 +110,49 @@
         ],
         "responses": {
           "200": {
-            "description": "Message created successfully",
+            "description": "Success",
             "schema": {
               "type": "object",
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "Unique message identifier",
                   "x-ms-summary": "Message ID"
-                },
-                "type": {
-                  "type": "string",
-                  "description": "Object type (always 'message')"
-                },
-                "role": {
-                  "type": "string",
-                  "description": "Role of the response (always 'assistant')"
                 },
                 "content": {
                   "type": "array",
-                  "description": "Response content blocks",
+                  "x-ms-summary": "Response",
                   "items": {
                     "type": "object",
                     "properties": {
                       "type": {
                         "type": "string",
-                        "description": "Content block type (text, tool_use, thinking)",
-                        "x-ms-summary": "Block Type"
+                        "x-ms-summary": "Type"
                       },
                       "text": {
                         "type": "string",
-                        "description": "Text content (when type=text)",
                         "x-ms-summary": "Response Text"
-                      },
-                      "id": {
-                        "type": "string",
-                        "description": "Tool use ID (when type=tool_use)"
-                      },
-                      "name": {
-                        "type": "string",
-                        "description": "Tool name (when type=tool_use)",
-                        "x-ms-summary": "Tool Name"
-                      },
-                      "input": {
-                        "type": "object",
-                        "description": "Tool input parameters (when type=tool_use)",
-                        "x-ms-summary": "Tool Input"
-                      },
-                      "thinking": {
-                        "type": "string",
-                        "description": "Thinking content (when type=thinking)",
-                        "x-ms-summary": "Thinking"
                       }
                     }
                   }
                 },
                 "model": {
                   "type": "string",
-                  "description": "Model used for the response"
+                  "x-ms-summary": "Model Used"
                 },
                 "stop_reason": {
                   "type": "string",
-                  "description": "Reason generation stopped",
                   "x-ms-summary": "Stop Reason"
-                },
-                "stop_sequence": {
-                  "type": "string",
-                  "description": "Stop sequence that triggered stop (if applicable)"
                 },
                 "usage": {
                   "type": "object",
-                  "description": "Token usage statistics",
+                  "x-ms-summary": "Token Usage",
                   "properties": {
                     "input_tokens": {
                       "type": "integer",
-                      "description": "Tokens in the input",
                       "x-ms-summary": "Input Tokens"
                     },
                     "output_tokens": {
                       "type": "integer",
-                      "description": "Tokens in the output",
                       "x-ms-summary": "Output Tokens"
                     }
                   }
@@ -291,83 +160,10 @@
               }
             }
           },
-          "400": {
-            "description": "Bad request - Invalid parameters",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Invalid API key",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Forbidden - Access denied",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Rate limited - Too many requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "529": {
-            "description": "API overloaded",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/messages/{message_id}": {
-      "get": {
-        "operationId": "GetMessage",
-        "summary": "Get Message",
-        "description": "Retrieve a previously created message by its ID (if message batching is enabled)",
-        "x-ms-visibility": "advanced",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "message_id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "The message ID to retrieve",
-            "x-ms-summary": "Message ID",
-            "x-ms-url-encoding": "single"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Message retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/MessageResponse"
-            }
-          },
-          "404": {
-            "description": "Message not found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
         }
       }
     },
@@ -375,7 +171,7 @@
       "post": {
         "operationId": "CountTokens",
         "summary": "Count Tokens",
-        "description": "Count the number of tokens in a message before sending. Useful for estimating costs and staying within limits.",
+        "description": "Count tokens before sending to estimate costs.",
         "x-ms-visibility": "advanced",
         "parameters": [
           {
@@ -396,34 +192,22 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "The model to use for token counting",
-                  "enum": [
-                    "claude-opus-4-5-20251101",
-                    "claude-sonnet-4-20250514",
-                    "claude-opus-4-20250514"
-                  ],
+                  "enum": ["claude-sonnet-4-20250514", "claude-opus-4-5-20251101", "claude-opus-4-20250514"],
                   "x-ms-summary": "Model"
                 },
                 "messages": {
                   "type": "array",
-                  "description": "Messages to count tokens for",
                   "x-ms-summary": "Messages",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "role": {
-                        "type": "string",
-                        "enum": ["user", "assistant"]
-                      },
-                      "content": {
-                        "type": "string"
-                      }
+                      "role": { "type": "string", "enum": ["user", "assistant"] },
+                      "content": { "type": "string" }
                     }
                   }
                 },
                 "system": {
                   "type": "string",
-                  "description": "System prompt to include in count",
                   "x-ms-summary": "System Prompt"
                 }
               }
@@ -432,294 +216,18 @@
         ],
         "responses": {
           "200": {
-            "description": "Token count successful",
+            "description": "Success",
             "schema": {
               "type": "object",
               "properties": {
                 "input_tokens": {
                   "type": "integer",
-                  "description": "Number of tokens in the input",
-                  "x-ms-summary": "Input Tokens"
+                  "x-ms-summary": "Token Count"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/messages/batches": {
-      "post": {
-        "operationId": "CreateMessageBatch",
-        "summary": "Create Message Batch",
-        "description": "Create a batch of messages for asynchronous processing. Up to 10,000 requests per batch with 50% cost savings.",
-        "x-ms-visibility": "advanced",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "anthropic-beta",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "message-batches-2024-09-24",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["requests"],
-              "properties": {
-                "requests": {
-                  "type": "array",
-                  "description": "Array of batch requests",
-                  "x-ms-summary": "Requests",
-                  "items": {
-                    "type": "object",
-                    "required": ["custom_id", "params"],
-                    "properties": {
-                      "custom_id": {
-                        "type": "string",
-                        "description": "Your identifier for this request"
-                      },
-                      "params": {
-                        "type": "object",
-                        "description": "Message parameters",
-                        "properties": {
-                          "model": {
-                            "type": "string"
-                          },
-                          "max_tokens": {
-                            "type": "integer"
-                          },
-                          "messages": {
-                            "type": "array",
-                            "items": {
-                              "type": "object"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Batch created successfully",
-            "schema": {
-              "$ref": "#/definitions/BatchResponse"
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "ListMessageBatches",
-        "summary": "List Message Batches",
-        "description": "List all message batches",
-        "x-ms-visibility": "advanced",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "anthropic-beta",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "message-batches-2024-09-24",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "description": "Maximum number of batches to return",
-            "x-ms-summary": "Limit"
-          },
-          {
-            "name": "before_id",
-            "in": "query",
-            "type": "string",
-            "description": "Return batches before this ID",
-            "x-ms-summary": "Before ID"
-          },
-          {
-            "name": "after_id",
-            "in": "query",
-            "type": "string",
-            "description": "Return batches after this ID",
-            "x-ms-summary": "After ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Batches retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/BatchResponse"
-                  }
-                },
-                "has_more": {
-                  "type": "boolean"
-                },
-                "first_id": {
-                  "type": "string"
-                },
-                "last_id": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Invalid API key",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Rate limited",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/messages/batches/{batch_id}": {
-      "get": {
-        "operationId": "GetMessageBatch",
-        "summary": "Get Message Batch",
-        "description": "Retrieve a message batch by ID",
-        "x-ms-visibility": "advanced",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "anthropic-beta",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "message-batches-2024-09-24",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "batch_id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "The batch ID",
-            "x-ms-summary": "Batch ID",
-            "x-ms-url-encoding": "single"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Batch retrieved successfully",
-            "schema": {
-              "$ref": "#/definitions/BatchResponse"
-            }
-          },
-          "404": {
-            "description": "Batch not found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/messages/batches/{batch_id}/cancel": {
-      "post": {
-        "operationId": "CancelMessageBatch",
-        "summary": "Cancel Message Batch",
-        "description": "Cancel a message batch that is still processing",
-        "x-ms-visibility": "advanced",
-        "parameters": [
-          {
-            "name": "anthropic-version",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "2023-06-01",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "anthropic-beta",
-            "in": "header",
-            "required": true,
-            "type": "string",
-            "default": "message-batches-2024-09-24",
-            "x-ms-visibility": "internal"
-          },
-          {
-            "name": "batch_id",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "The batch ID to cancel",
-            "x-ms-summary": "Batch ID",
-            "x-ms-url-encoding": "single"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Batch cancelled successfully",
-            "schema": {
-              "$ref": "#/definitions/BatchResponse"
-            }
-          },
-          "404": {
-            "description": "Batch not found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } }
         }
       }
     }
@@ -728,139 +236,20 @@
     "ErrorResponse": {
       "type": "object",
       "properties": {
-        "type": {
-          "type": "string",
-          "description": "Error type"
-        },
+        "type": { "type": "string", "x-ms-summary": "Error Type" },
         "error": {
           "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "Error category"
-            },
-            "message": {
-              "type": "string",
-              "description": "Human-readable error message"
-            }
+            "type": { "type": "string", "x-ms-summary": "Error Category" },
+            "message": { "type": "string", "x-ms-summary": "Error Message" }
           }
-        }
-      }
-    },
-    "MessageResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique message identifier"
-        },
-        "type": {
-          "type": "string"
-        },
-        "role": {
-          "type": "string"
-        },
-        "content": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "type": {
-                "type": "string"
-              },
-              "text": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "model": {
-          "type": "string"
-        },
-        "stop_reason": {
-          "type": "string"
-        },
-        "usage": {
-          "type": "object",
-          "properties": {
-            "input_tokens": {
-              "type": "integer"
-            },
-            "output_tokens": {
-              "type": "integer"
-            }
-          }
-        }
-      }
-    },
-    "BatchResponse": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Batch ID",
-          "x-ms-summary": "Batch ID"
-        },
-        "type": {
-          "type": "string"
-        },
-        "processing_status": {
-          "type": "string",
-          "description": "Current status: in_progress, canceling, ended",
-          "x-ms-summary": "Status"
-        },
-        "request_counts": {
-          "type": "object",
-          "properties": {
-            "processing": {
-              "type": "integer"
-            },
-            "succeeded": {
-              "type": "integer"
-            },
-            "errored": {
-              "type": "integer"
-            },
-            "canceled": {
-              "type": "integer"
-            },
-            "expired": {
-              "type": "integer"
-            }
-          }
-        },
-        "ended_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "expires_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "results_url": {
-          "type": "string",
-          "description": "URL to download results (when complete)",
-          "x-ms-summary": "Results URL"
         }
       }
     }
   },
   "x-ms-connector-metadata": [
-    {
-      "propertyName": "Website",
-      "propertyValue": "https://www.anthropic.com"
-    },
-    {
-      "propertyName": "Privacy policy",
-      "propertyValue": "https://www.anthropic.com/privacy"
-    },
-    {
-      "propertyName": "Categories",
-      "propertyValue": "AI;Productivity"
-    }
+    { "propertyName": "Website", "propertyValue": "https://www.anthropic.com" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://www.anthropic.com/privacy" },
+    { "propertyName": "Categories", "propertyValue": "AI;Productivity" }
   ]
 }
