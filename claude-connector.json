@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -31,7 +31,7 @@
       "post": {
         "operationId": "AskClaude",
         "summary": "Ask Claude",
-        "description": "Send a prompt to Claude and get a response.",
+        "description": "Simple prompt to Claude. For advanced options, use 'Create a Message (Advanced)'.",
         "x-ms-visibility": "important",
         "parameters": [
           {
@@ -88,21 +88,7 @@
                   "description": "Maximum response length",
                   "default": 1024,
                   "x-ms-summary": "Max Tokens",
-                  "x-ms-visibility": "advanced"
-                },
-                "system": {
-                  "type": "string",
-                  "description": "Instructions for Claude's behavior",
-                  "x-ms-summary": "System Prompt",
-                  "x-ms-visibility": "advanced"
-                },
-                "temperature": {
-                  "type": "number",
-                  "description": "Randomness 0-1 (lower = more deterministic)",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "x-ms-summary": "Temperature",
-                  "x-ms-visibility": "advanced"
+                  "x-ms-visibility": "internal"
                 }
               }
             }
@@ -142,6 +128,179 @@
                 "stop_reason": {
                   "type": "string",
                   "x-ms-summary": "Stop Reason"
+                },
+                "usage": {
+                  "type": "object",
+                  "x-ms-summary": "Token Usage",
+                  "properties": {
+                    "input_tokens": {
+                      "type": "integer",
+                      "x-ms-summary": "Input Tokens"
+                    },
+                    "output_tokens": {
+                      "type": "integer",
+                      "x-ms-summary": "Output Tokens"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    },
+    "/messages/": {
+      "post": {
+        "operationId": "CreateMessage",
+        "summary": "Create a Message (Advanced)",
+        "description": "Full control over Claude API with system prompts, temperature, and all parameters.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["model", "max_tokens", "messages"],
+              "properties": {
+                "model": {
+                  "type": "string",
+                  "description": "Which Claude model to use",
+                  "enum": [
+                    "claude-sonnet-4-20250514",
+                    "claude-opus-4-5-20251101",
+                    "claude-opus-4-20250514"
+                  ],
+                  "default": "claude-sonnet-4-20250514",
+                  "x-ms-summary": "Model"
+                },
+                "messages": {
+                  "type": "array",
+                  "description": "Conversation messages",
+                  "x-ms-summary": "Messages",
+                  "items": {
+                    "type": "object",
+                    "required": ["role", "content"],
+                    "properties": {
+                      "role": {
+                        "type": "string",
+                        "description": "user or assistant",
+                        "enum": ["user", "assistant"],
+                        "default": "user",
+                        "x-ms-summary": "Role"
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "The message text",
+                        "x-ms-summary": "Content"
+                      }
+                    }
+                  }
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "Maximum tokens in response (1-4096)",
+                  "default": 1024,
+                  "minimum": 1,
+                  "maximum": 4096,
+                  "x-ms-summary": "Max Tokens"
+                },
+                "system": {
+                  "type": "string",
+                  "description": "System prompt - instructions for Claude's behavior",
+                  "x-ms-summary": "System Prompt"
+                },
+                "temperature": {
+                  "type": "number",
+                  "description": "Randomness 0-1 (0=deterministic, 1=creative)",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-ms-summary": "Temperature"
+                },
+                "top_p": {
+                  "type": "number",
+                  "description": "Nucleus sampling threshold",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "x-ms-summary": "Top P"
+                },
+                "top_k": {
+                  "type": "integer",
+                  "description": "Only sample from top K tokens",
+                  "minimum": 1,
+                  "x-ms-summary": "Top K"
+                },
+                "stop_sequences": {
+                  "type": "array",
+                  "description": "Sequences that stop generation",
+                  "x-ms-summary": "Stop Sequences",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "x-ms-summary": "Message ID"
+                },
+                "type": {
+                  "type": "string",
+                  "x-ms-summary": "Response Type"
+                },
+                "role": {
+                  "type": "string",
+                  "x-ms-summary": "Role"
+                },
+                "content": {
+                  "type": "array",
+                  "x-ms-summary": "Response Content",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "x-ms-summary": "Content Type"
+                      },
+                      "text": {
+                        "type": "string",
+                        "x-ms-summary": "Response Text"
+                      }
+                    }
+                  }
+                },
+                "model": {
+                  "type": "string",
+                  "x-ms-summary": "Model Used"
+                },
+                "stop_reason": {
+                  "type": "string",
+                  "x-ms-summary": "Stop Reason"
+                },
+                "stop_sequence": {
+                  "type": "string",
+                  "x-ms-summary": "Stop Sequence"
                 },
                 "usage": {
                   "type": "object",
