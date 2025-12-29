@@ -28,6 +28,17 @@
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request"
         }
+      },
+      {
+        "templateId": "setproperty",
+        "title": "Transform prompt to messages",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "messages",
+          "x-ms-apimTemplateParameter.value": "@createArray(json(concat('{\"role\":\"user\",\"content\":\"', replace(replace(triggerBody()?['prompt'], '\\', '\\\\'), '\"', '\\\"'), '\"}')))",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request",
+          "x-ms-apimTemplate-operationId": ["AskClaude"]
+        }
       }
     ]
   }

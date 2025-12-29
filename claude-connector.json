@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.4.1",
+    "version": "2.5.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -52,7 +52,7 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["model", "max_tokens", "messages"],
+              "required": ["model", "prompt"],
               "properties": {
                 "model": {
                   "type": "string",
@@ -66,31 +66,17 @@
                   "default": 4096,
                   "x-ms-visibility": "internal"
                 },
-                "messages": {
-                  "type": "array",
-                  "x-ms-summary": "Messages",
-                  "items": {
-                    "type": "object",
-                    "required": ["role", "content"],
-                    "properties": {
-                      "role": {
-                        "type": "string",
-                        "default": "user",
-                        "x-ms-visibility": "internal"
-                      },
-                      "content": {
-                        "type": "string",
-                        "description": "Your question or prompt for Claude",
-                        "x-ms-summary": "Prompt"
-                      }
-                    }
-                  }
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question for Claude",
+                  "x-ms-summary": "Prompt",
+                  "x-ms-visibility": "important"
                 },
                 "system": {
                   "type": "string",
-                  "description": "Set to 'json' for JSON output, or leave empty for text",
+                  "description": "Leave empty for text, or set for JSON output",
                   "x-ms-summary": "Output Format",
-                  "enum": ["", "Respond only with valid JSON. No explanation or markdown."],
+                  "enum": ["", "Respond only with valid JSON."],
                   "default": ""
                 }
               }
@@ -106,20 +92,20 @@
                 "id": { "type": "string", "x-ms-summary": "Message ID" },
                 "content": {
                   "type": "array",
-                  "x-ms-summary": "Response",
+                  "x-ms-summary": "Content",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "type": { "type": "string", "x-ms-summary": "Type" },
-                      "text": { "type": "string", "x-ms-summary": "Response Text" }
+                      "type": { "type": "string" },
+                      "text": { "type": "string", "x-ms-summary": "Response" }
                     }
                   }
                 },
-                "model": { "type": "string", "x-ms-summary": "Model Used" },
+                "model": { "type": "string", "x-ms-summary": "Model" },
                 "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason" },
                 "usage": {
                   "type": "object",
-                  "x-ms-summary": "Token Usage",
+                  "x-ms-summary": "Usage",
                   "properties": {
                     "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
                     "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
