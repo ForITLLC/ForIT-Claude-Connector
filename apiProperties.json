@@ -30,6 +30,7 @@
         }
       }
     ],
+    "script": "script.csx",
     "scriptOperations": ["AskClaude"]
   }
 }
