@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -31,7 +31,7 @@
       "post": {
         "operationId": "AskClaude",
         "summary": "Ask Claude",
-        "description": "Simple prompt to Claude. For advanced options, use 'Create a Message (Advanced)'.",
+        "description": "Simple prompt to Claude 4.5 Opus.",
         "x-ms-visibility": "important",
         "parameters": [
           {
@@ -52,14 +52,11 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "Which Claude model to use",
-                  "enum": [
-                    "claude-sonnet-4-20250514",
-                    "claude-opus-4-5-20251101",
-                    "claude-opus-4-20250514"
-                  ],
-                  "default": "claude-sonnet-4-20250514",
-                  "x-ms-summary": "Model"
+                  "description": "Claude 4.5 Opus",
+                  "enum": ["claude-opus-4-5-20251101"],
+                  "default": "claude-opus-4-5-20251101",
+                  "x-ms-summary": "Model",
+                  "x-ms-visibility": "internal"
                 },
                 "messages": {
                   "type": "array",
@@ -100,47 +97,26 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "string",
-                  "x-ms-summary": "Message ID"
-                },
+                "id": { "type": "string", "x-ms-summary": "Message ID" },
                 "content": {
                   "type": "array",
                   "x-ms-summary": "Response",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "type": {
-                        "type": "string",
-                        "x-ms-summary": "Type"
-                      },
-                      "text": {
-                        "type": "string",
-                        "x-ms-summary": "Response Text"
-                      }
+                      "type": { "type": "string", "x-ms-summary": "Type" },
+                      "text": { "type": "string", "x-ms-summary": "Response Text" }
                     }
                   }
                 },
-                "model": {
-                  "type": "string",
-                  "x-ms-summary": "Model Used"
-                },
-                "stop_reason": {
-                  "type": "string",
-                  "x-ms-summary": "Stop Reason"
-                },
+                "model": { "type": "string", "x-ms-summary": "Model Used" },
+                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason" },
                 "usage": {
                   "type": "object",
                   "x-ms-summary": "Token Usage",
                   "properties": {
-                    "input_tokens": {
-                      "type": "integer",
-                      "x-ms-summary": "Input Tokens"
-                    },
-                    "output_tokens": {
-                      "type": "integer",
-                      "x-ms-summary": "Output Tokens"
-                    }
+                    "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
+                    "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
                   }
                 }
               }
@@ -178,13 +154,9 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "Which Claude model to use",
-                  "enum": [
-                    "claude-sonnet-4-20250514",
-                    "claude-opus-4-5-20251101",
-                    "claude-opus-4-20250514"
-                  ],
-                  "default": "claude-sonnet-4-20250514",
+                  "description": "Claude 4.5 Opus",
+                  "enum": ["claude-opus-4-5-20251101"],
+                  "default": "claude-opus-4-5-20251101",
                   "x-ms-summary": "Model"
                 },
                 "messages": {
@@ -195,62 +167,17 @@
                     "type": "object",
                     "required": ["role", "content"],
                     "properties": {
-                      "role": {
-                        "type": "string",
-                        "description": "user or assistant",
-                        "enum": ["user", "assistant"],
-                        "default": "user",
-                        "x-ms-summary": "Role"
-                      },
-                      "content": {
-                        "type": "string",
-                        "description": "The message text",
-                        "x-ms-summary": "Content"
-                      }
+                      "role": { "type": "string", "enum": ["user", "assistant"], "default": "user", "x-ms-summary": "Role" },
+                      "content": { "type": "string", "x-ms-summary": "Content" }
                     }
                   }
                 },
-                "max_tokens": {
-                  "type": "integer",
-                  "description": "Maximum tokens in response (1-4096)",
-                  "default": 1024,
-                  "minimum": 1,
-                  "maximum": 4096,
-                  "x-ms-summary": "Max Tokens"
-                },
-                "system": {
-                  "type": "string",
-                  "description": "System prompt - instructions for Claude's behavior",
-                  "x-ms-summary": "System Prompt"
-                },
-                "temperature": {
-                  "type": "number",
-                  "description": "Randomness 0-1 (0=deterministic, 1=creative)",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "x-ms-summary": "Temperature"
-                },
-                "top_p": {
-                  "type": "number",
-                  "description": "Nucleus sampling threshold",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "x-ms-summary": "Top P"
-                },
-                "top_k": {
-                  "type": "integer",
-                  "description": "Only sample from top K tokens",
-                  "minimum": 1,
-                  "x-ms-summary": "Top K"
-                },
-                "stop_sequences": {
-                  "type": "array",
-                  "description": "Sequences that stop generation",
-                  "x-ms-summary": "Stop Sequences",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+                "max_tokens": { "type": "integer", "default": 1024, "minimum": 1, "maximum": 4096, "x-ms-summary": "Max Tokens" },
+                "system": { "type": "string", "description": "System prompt", "x-ms-summary": "System Prompt" },
+                "temperature": { "type": "number", "minimum": 0, "maximum": 1, "x-ms-summary": "Temperature" },
+                "top_p": { "type": "number", "minimum": 0, "maximum": 1, "x-ms-summary": "Top P" },
+                "top_k": { "type": "integer", "minimum": 1, "x-ms-summary": "Top K" },
+                "stop_sequences": { "type": "array", "x-ms-summary": "Stop Sequences", "items": { "type": "string" } }
               }
             }
           }
@@ -261,59 +188,29 @@
             "schema": {
               "type": "object",
               "properties": {
-                "id": {
-                  "type": "string",
-                  "x-ms-summary": "Message ID"
-                },
-                "type": {
-                  "type": "string",
-                  "x-ms-summary": "Response Type"
-                },
-                "role": {
-                  "type": "string",
-                  "x-ms-summary": "Role"
-                },
+                "id": { "type": "string", "x-ms-summary": "Message ID" },
+                "type": { "type": "string", "x-ms-summary": "Response Type" },
+                "role": { "type": "string", "x-ms-summary": "Role" },
                 "content": {
                   "type": "array",
                   "x-ms-summary": "Response Content",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "type": {
-                        "type": "string",
-                        "x-ms-summary": "Content Type"
-                      },
-                      "text": {
-                        "type": "string",
-                        "x-ms-summary": "Response Text"
-                      }
+                      "type": { "type": "string", "x-ms-summary": "Content Type" },
+                      "text": { "type": "string", "x-ms-summary": "Response Text" }
                     }
                   }
                 },
-                "model": {
-                  "type": "string",
-                  "x-ms-summary": "Model Used"
-                },
-                "stop_reason": {
-                  "type": "string",
-                  "x-ms-summary": "Stop Reason"
-                },
-                "stop_sequence": {
-                  "type": "string",
-                  "x-ms-summary": "Stop Sequence"
-                },
+                "model": { "type": "string", "x-ms-summary": "Model Used" },
+                "stop_reason": { "type": "string", "x-ms-summary": "Stop Reason" },
+                "stop_sequence": { "type": "string", "x-ms-summary": "Stop Sequence" },
                 "usage": {
                   "type": "object",
                   "x-ms-summary": "Token Usage",
                   "properties": {
-                    "input_tokens": {
-                      "type": "integer",
-                      "x-ms-summary": "Input Tokens"
-                    },
-                    "output_tokens": {
-                      "type": "integer",
-                      "x-ms-summary": "Output Tokens"
-                    }
+                    "input_tokens": { "type": "integer", "x-ms-summary": "Input Tokens" },
+                    "output_tokens": { "type": "integer", "x-ms-summary": "Output Tokens" }
                   }
                 }
               }
@@ -349,11 +246,7 @@
               "type": "object",
               "required": ["model", "messages"],
               "properties": {
-                "model": {
-                  "type": "string",
-                  "enum": ["claude-sonnet-4-20250514", "claude-opus-4-5-20251101", "claude-opus-4-20250514"],
-                  "x-ms-summary": "Model"
-                },
+                "model": { "type": "string", "enum": ["claude-opus-4-5-20251101"], "default": "claude-opus-4-5-20251101", "x-ms-summary": "Model" },
                 "messages": {
                   "type": "array",
                   "x-ms-summary": "Messages",
@@ -365,9 +258,85 @@
                     }
                   }
                 },
-                "system": {
-                  "type": "string",
-                  "x-ms-summary": "System Prompt"
+                "system": { "type": "string", "x-ms-summary": "System Prompt" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "input_tokens": { "type": "integer", "x-ms-summary": "Token Count" }
+              }
+            }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    },
+    "/messages/batches": {
+      "post": {
+        "operationId": "CreateMessageBatch",
+        "summary": "Create Message Batch (Advanced)",
+        "description": "Create a batch of messages for async processing.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "anthropic-beta",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "message-batches-2024-09-24",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["requests"],
+              "properties": {
+                "requests": {
+                  "type": "array",
+                  "x-ms-summary": "Batch Requests",
+                  "items": {
+                    "type": "object",
+                    "required": ["custom_id", "params"],
+                    "properties": {
+                      "custom_id": { "type": "string", "x-ms-summary": "Custom ID" },
+                      "params": {
+                        "type": "object",
+                        "x-ms-summary": "Request Parameters",
+                        "properties": {
+                          "model": { "type": "string", "enum": ["claude-opus-4-5-20251101"], "default": "claude-opus-4-5-20251101", "x-ms-summary": "Model" },
+                          "max_tokens": { "type": "integer", "default": 1024, "x-ms-summary": "Max Tokens" },
+                          "messages": {
+                            "type": "array",
+                            "x-ms-summary": "Messages",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "role": { "type": "string", "enum": ["user", "assistant"] },
+                                "content": { "type": "string" }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -379,14 +348,189 @@
             "schema": {
               "type": "object",
               "properties": {
-                "input_tokens": {
-                  "type": "integer",
-                  "x-ms-summary": "Token Count"
-                }
+                "id": { "type": "string", "x-ms-summary": "Batch ID" },
+                "type": { "type": "string", "x-ms-summary": "Type" },
+                "processing_status": { "type": "string", "x-ms-summary": "Processing Status" },
+                "request_counts": {
+                  "type": "object",
+                  "x-ms-summary": "Request Counts",
+                  "properties": {
+                    "processing": { "type": "integer", "x-ms-summary": "Processing" },
+                    "succeeded": { "type": "integer", "x-ms-summary": "Succeeded" },
+                    "errored": { "type": "integer", "x-ms-summary": "Errored" },
+                    "canceled": { "type": "integer", "x-ms-summary": "Canceled" },
+                    "expired": { "type": "integer", "x-ms-summary": "Expired" }
+                  }
+                },
+                "created_at": { "type": "string", "x-ms-summary": "Created At" },
+                "expires_at": { "type": "string", "x-ms-summary": "Expires At" }
               }
             }
           },
           "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      },
+      "get": {
+        "operationId": "ListMessageBatches",
+        "summary": "List Message Batches (Advanced)",
+        "description": "List all message batches.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "anthropic-beta",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "message-batches-2024-09-24",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 20,
+            "x-ms-summary": "Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "x-ms-summary": "Batches",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "x-ms-summary": "Batch ID" },
+                      "processing_status": { "type": "string", "x-ms-summary": "Status" },
+                      "created_at": { "type": "string", "x-ms-summary": "Created At" }
+                    }
+                  }
+                },
+                "has_more": { "type": "boolean", "x-ms-summary": "Has More" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/messages/batches/{batch_id}": {
+      "get": {
+        "operationId": "GetMessageBatch",
+        "summary": "Get Message Batch (Advanced)",
+        "description": "Get details of a specific message batch.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "anthropic-beta",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "message-batches-2024-09-24",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Batch ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "x-ms-summary": "Batch ID" },
+                "type": { "type": "string", "x-ms-summary": "Type" },
+                "processing_status": { "type": "string", "x-ms-summary": "Processing Status" },
+                "request_counts": {
+                  "type": "object",
+                  "x-ms-summary": "Request Counts",
+                  "properties": {
+                    "processing": { "type": "integer", "x-ms-summary": "Processing" },
+                    "succeeded": { "type": "integer", "x-ms-summary": "Succeeded" },
+                    "errored": { "type": "integer", "x-ms-summary": "Errored" },
+                    "canceled": { "type": "integer", "x-ms-summary": "Canceled" },
+                    "expired": { "type": "integer", "x-ms-summary": "Expired" }
+                  }
+                },
+                "created_at": { "type": "string", "x-ms-summary": "Created At" },
+                "ended_at": { "type": "string", "x-ms-summary": "Ended At" },
+                "expires_at": { "type": "string", "x-ms-summary": "Expires At" },
+                "results_url": { "type": "string", "x-ms-summary": "Results URL" }
+              }
+            }
+          },
+          "404": { "description": "Not found", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    },
+    "/messages/batches/{batch_id}/cancel": {
+      "post": {
+        "operationId": "CancelMessageBatch",
+        "summary": "Cancel Message Batch (Advanced)",
+        "description": "Cancel a message batch that is in progress.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "anthropic-version",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "2023-06-01",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "anthropic-beta",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "default": "message-batches-2024-09-24",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Batch ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "x-ms-summary": "Batch ID" },
+                "type": { "type": "string", "x-ms-summary": "Type" },
+                "processing_status": { "type": "string", "x-ms-summary": "Processing Status" }
+              }
+            }
+          },
+          "404": { "description": "Not found", "schema": { "$ref": "#/definitions/ErrorResponse" } }
         }
       }
     }
