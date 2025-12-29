@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -31,8 +31,12 @@
       "post": {
         "operationId": "AskClaude",
         "summary": "Ask Claude",
-        "description": "Simple prompt to Claude 4.5 Opus.",
+        "description": "Simple prompt to Claude 4.5. For advanced options, use Create a Message (Advanced).",
         "x-ms-visibility": "important",
+        "x-ms-api-annotation": {
+          "family": "AskClaude",
+          "revision": 1
+        },
         "parameters": [
           {
             "name": "anthropic-version",
@@ -52,15 +56,16 @@
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "Claude 4.5 Opus",
-                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
                   "default": "claude-sonnet-4-5-20250929",
-                  "x-ms-summary": "Model",
+                  "x-ms-visibility": "internal"
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "default": 4096,
                   "x-ms-visibility": "internal"
                 },
                 "messages": {
                   "type": "array",
-                  "description": "Your prompt to Claude",
                   "x-ms-summary": "Messages",
                   "items": {
                     "type": "object",
@@ -68,25 +73,23 @@
                     "properties": {
                       "role": {
                         "type": "string",
-                        "enum": ["user"],
                         "default": "user",
-                        "x-ms-summary": "Role",
                         "x-ms-visibility": "internal"
                       },
                       "content": {
                         "type": "string",
-                        "description": "Your prompt to Claude",
+                        "description": "Your question or prompt for Claude",
                         "x-ms-summary": "Prompt"
                       }
                     }
                   }
                 },
-                "max_tokens": {
-                  "type": "integer",
-                  "description": "Maximum response length",
-                  "default": 1024,
-                  "x-ms-summary": "Max Tokens",
-                  "x-ms-visibility": "internal"
+                "system": {
+                  "type": "string",
+                  "description": "Set to 'json' for JSON output, or leave empty for text",
+                  "x-ms-summary": "Output Format",
+                  "enum": ["", "Respond only with valid JSON. No explanation or markdown."],
+                  "default": ""
                 }
               }
             }
