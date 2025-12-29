@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -52,11 +52,11 @@
             "required": true,
             "schema": {
               "type": "object",
-              "required": ["model", "prompt"],
+              "required": ["model", "max_tokens", "messages"],
               "properties": {
                 "model": {
                   "type": "string",
-                  "description": "Claude 4.5 model to use",
+                  "description": "Claude 4.5 model",
                   "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
                   "default": "claude-sonnet-4-5-20250929",
                   "x-ms-summary": "Model"
@@ -66,18 +66,54 @@
                   "default": 4096,
                   "x-ms-visibility": "internal"
                 },
-                "prompt": {
-                  "type": "string",
-                  "description": "Your question for Claude",
-                  "x-ms-summary": "Prompt",
-                  "x-ms-visibility": "important"
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["role", "content"],
+                    "properties": {
+                      "role": {
+                        "type": "string",
+                        "default": "user",
+                        "x-ms-visibility": "internal"
+                      },
+                      "content": {
+                        "type": "string",
+                        "description": "Your question for Claude",
+                        "x-ms-summary": "Prompt"
+                      }
+                    }
+                  }
                 },
                 "system": {
                   "type": "string",
-                  "description": "Leave empty for text, or set for JSON output",
+                  "description": "Leave empty for text, or set for JSON",
                   "x-ms-summary": "Output Format",
                   "enum": ["", "Respond only with valid JSON."],
-                  "default": ""
+                  "default": "",
+                  "x-ms-visibility": "advanced"
+                },
+                "thinking": {
+                  "type": "object",
+                  "description": "Enable extended thinking mode",
+                  "x-ms-summary": "Extended Thinking",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["enabled"],
+                      "default": "enabled",
+                      "x-ms-visibility": "internal"
+                    },
+                    "budget_tokens": {
+                      "type": "integer",
+                      "description": "Token budget for reasoning (10000-128000)",
+                      "x-ms-summary": "Thinking Budget",
+                      "default": 10000,
+                      "minimum": 1024,
+                      "maximum": 128000
+                    }
+                  }
                 }
               }
             }
@@ -96,8 +132,9 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "type": { "type": "string" },
-                      "text": { "type": "string", "x-ms-summary": "Response" }
+                      "type": { "type": "string", "x-ms-summary": "Content Type" },
+                      "text": { "type": "string", "x-ms-summary": "Response" },
+                      "thinking": { "type": "string", "x-ms-summary": "Thinking" }
                     }
                   }
                 },
