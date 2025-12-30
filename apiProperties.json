@@ -28,15 +28,6 @@
           "x-ms-apimTemplateParameter.existsAction": "skip",
           "x-ms-apimTemplate-policySection": "Request"
         }
-      },
-      {
-        "templateId": "retrypolicy",
-        "title": "Limit Retries",
-        "parameters": {
-          "x-ms-apimTemplateParameter.retryCount": "1",
-          "x-ms-apimTemplateParameter.retryInterval": "PT10S",
-          "x-ms-apimTemplateParameter.retryMaxInterval": "PT30S"
-        }
       }
     ],
     "script": "script.csx",
