@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.4",
+    "version": "2.6.5",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -93,6 +93,15 @@
                   "default": 10000,
                   "minimum": 1024,
                   "maximum": 128000,
+                  "x-ms-visibility": "advanced"
+                },
+                "temperature": {
+                  "type": "number",
+                  "description": "Controls randomness (0=deterministic, 1=creative). Use 0 for structured outputs.",
+                  "x-ms-summary": "Temperature",
+                  "default": 1,
+                  "minimum": 0,
+                  "maximum": 1,
                   "x-ms-visibility": "advanced"
                 }
               }
