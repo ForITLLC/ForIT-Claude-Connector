@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.5",
+    "version": "2.6.6",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -57,8 +57,8 @@
                 "model": {
                   "type": "string",
                   "description": "Claude 4.5 model",
-                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
-                  "default": "claude-sonnet-4-5-20250929",
+                  "enum": ["claude-sonnet-4-5", "claude-opus-4-5"],
+                  "default": "claude-sonnet-4-5",
                   "x-ms-summary": "Model"
                 },
                 "max_tokens": {
@@ -164,8 +164,8 @@
                 "model": {
                   "type": "string",
                   "description": "Claude 4.5 Opus",
-                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"],
-                  "default": "claude-sonnet-4-5-20250929",
+                  "enum": ["claude-sonnet-4-5", "claude-opus-4-5"],
+                  "default": "claude-sonnet-4-5",
                   "x-ms-summary": "Model"
                 },
                 "messages": {
