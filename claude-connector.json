@@ -3,7 +3,7 @@
   "info": {
     "title": "ForIT Claude Connector",
     "description": "Power Automate connector for Anthropic's Claude API.",
-    "version": "2.6.6",
+    "version": "2.7.0",
     "contact": {
       "name": "ForIT Support",
       "url": "https://github.com/ForITLLC/ForIT-Claude-Connector"
@@ -142,7 +142,7 @@
       "post": {
         "operationId": "CreateMessage",
         "summary": "Create a Message (Advanced)",
-        "description": "Full control over Claude API with system prompts, temperature, and all parameters.",
+        "description": "Full control over Claude API with system prompts, temperature, tool use, and all parameters.",
         "x-ms-visibility": "advanced",
         "parameters": [
           {
@@ -170,14 +170,14 @@
                 },
                 "messages": {
                   "type": "array",
-                  "description": "Conversation messages",
+                  "description": "Conversation messages (role: user/assistant/tool_result)",
                   "x-ms-summary": "Messages",
                   "items": {
                     "type": "object",
                     "required": ["role", "content"],
                     "properties": {
                       "role": { "type": "string", "enum": ["user", "assistant"], "default": "user", "x-ms-summary": "Role" },
-                      "content": { "type": "string", "x-ms-summary": "Content" }
+                      "content": { "x-ms-summary": "Content" }
                     }
                   }
                 },
@@ -186,7 +186,25 @@
                 "temperature": { "type": "number", "minimum": 0, "maximum": 1, "x-ms-summary": "Temperature" },
                 "top_p": { "type": "number", "minimum": 0, "maximum": 1, "x-ms-summary": "Top P" },
                 "top_k": { "type": "integer", "minimum": 1, "x-ms-summary": "Top K" },
-                "stop_sequences": { "type": "array", "x-ms-summary": "Stop Sequences", "items": { "type": "string" } }
+                "stop_sequences": { "type": "array", "x-ms-summary": "Stop Sequences", "items": { "type": "string" } },
+                "tools": {
+                  "type": "array",
+                  "description": "Tools/functions Claude can call",
+                  "x-ms-summary": "Tools",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string", "x-ms-summary": "Tool Name" },
+                      "description": { "type": "string", "x-ms-summary": "Tool Description" },
+                      "input_schema": { "type": "object", "x-ms-summary": "Input Schema" }
+                    }
+                  }
+                },
+                "tool_choice": {
+                  "type": "object",
+                  "description": "How Claude should use tools: {\"type\":\"auto\"}, {\"type\":\"any\"}, or {\"type\":\"tool\",\"name\":\"tool_name\"}",
+                  "x-ms-summary": "Tool Choice"
+                }
               }
             }
           }
@@ -207,7 +225,10 @@
                     "type": "object",
                     "properties": {
                       "type": { "type": "string", "x-ms-summary": "Content Type" },
-                      "text": { "type": "string", "x-ms-summary": "Response Text" }
+                      "text": { "type": "string", "x-ms-summary": "Response Text" },
+                      "id": { "type": "string", "x-ms-summary": "Tool Use ID" },
+                      "name": { "type": "string", "x-ms-summary": "Tool Name" },
+                      "input": { "type": "object", "x-ms-summary": "Tool Input" }
                     }
                   }
                 },
