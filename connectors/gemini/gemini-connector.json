@@ -1,0 +1,269 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ForIT Gemini Connector",
+    "description": "Power Automate connector for Google's Gemini API.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ForIT Support",
+      "url": "https://github.com/ForITLLC/ForIT-AI-Connectors"
+    },
+    "x-ms-api-annotation": {
+      "status": "Preview"
+    }
+  },
+  "host": "generativelanguage.googleapis.com",
+  "basePath": "/v1beta",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/models/{model}:generateContent": {
+      "post": {
+        "operationId": "AskGemini",
+        "summary": "Ask Gemini",
+        "description": "Simple prompt to Gemini. For advanced options, use Generate Content (Advanced).",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Gemini model",
+            "enum": ["gemini-2.5-flash", "gemini-2.0-flash"],
+            "default": "gemini-2.5-flash",
+            "x-ms-summary": "Model",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["prompt"],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question for Gemini",
+                  "x-ms-summary": "Prompt"
+                },
+                "output_format": {
+                  "type": "string",
+                  "description": "Response format",
+                  "x-ms-summary": "Output Format",
+                  "enum": ["text", "json"],
+                  "default": "text",
+                  "x-ms-visibility": "advanced"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": { "type": "string", "x-ms-summary": "Response" },
+                "model": { "type": "string", "x-ms-summary": "Model", "x-ms-visibility": "advanced" },
+                "usage": {
+                  "type": "object",
+                  "x-ms-summary": "Usage",
+                  "x-ms-visibility": "advanced",
+                  "properties": {
+                    "prompt_tokens": { "type": "integer", "x-ms-summary": "Prompt Tokens" },
+                    "completion_tokens": { "type": "integer", "x-ms-summary": "Completion Tokens" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    },
+    "/models/{model}:generateContent/": {
+      "post": {
+        "operationId": "GenerateContent",
+        "summary": "Generate Content (Advanced)",
+        "description": "Full control over Gemini API with system instructions, temperature, safety settings, and all parameters.",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Gemini model",
+            "enum": ["gemini-2.5-flash", "gemini-2.0-flash"],
+            "default": "gemini-2.5-flash",
+            "x-ms-summary": "Model",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-visibility": "internal"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["contents"],
+              "properties": {
+                "contents": {
+                  "type": "array",
+                  "description": "Conversation contents",
+                  "x-ms-summary": "Contents",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": { "type": "string", "enum": ["user", "model"], "x-ms-summary": "Role" },
+                      "parts": {
+                        "type": "array",
+                        "x-ms-summary": "Parts",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "text": { "type": "string", "x-ms-summary": "Text" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "systemInstruction": {
+                  "type": "object",
+                  "description": "System instruction",
+                  "x-ms-summary": "System Instruction",
+                  "properties": {
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "text": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                },
+                "generationConfig": {
+                  "type": "object",
+                  "description": "Generation configuration",
+                  "x-ms-summary": "Generation Config",
+                  "properties": {
+                    "temperature": { "type": "number", "x-ms-summary": "Temperature" },
+                    "topP": { "type": "number", "x-ms-summary": "Top P" },
+                    "topK": { "type": "integer", "x-ms-summary": "Top K" },
+                    "maxOutputTokens": { "type": "integer", "x-ms-summary": "Max Output Tokens" },
+                    "responseMimeType": { "type": "string", "x-ms-summary": "Response MIME Type" }
+                  }
+                },
+                "safetySettings": {
+                  "type": "array",
+                  "description": "Safety settings",
+                  "x-ms-summary": "Safety Settings",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "category": { "type": "string", "x-ms-summary": "Category" },
+                      "threshold": { "type": "string", "x-ms-summary": "Threshold" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "candidates": {
+                  "type": "array",
+                  "x-ms-summary": "Candidates",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "parts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "text": { "type": "string", "x-ms-summary": "Text" }
+                              }
+                            }
+                          },
+                          "role": { "type": "string", "x-ms-summary": "Role" }
+                        }
+                      },
+                      "finishReason": { "type": "string", "x-ms-summary": "Finish Reason" },
+                      "safetyRatings": { "type": "array", "x-ms-summary": "Safety Ratings" }
+                    }
+                  }
+                },
+                "usageMetadata": {
+                  "type": "object",
+                  "x-ms-summary": "Usage",
+                  "properties": {
+                    "promptTokenCount": { "type": "integer", "x-ms-summary": "Prompt Tokens" },
+                    "candidatesTokenCount": { "type": "integer", "x-ms-summary": "Completion Tokens" },
+                    "totalTokenCount": { "type": "integer", "x-ms-summary": "Total Tokens" }
+                  }
+                },
+                "modelVersion": { "type": "string", "x-ms-summary": "Model Version" }
+              }
+            }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "integer", "x-ms-summary": "Error Code" },
+            "message": { "type": "string", "x-ms-summary": "Error Message" },
+            "status": { "type": "string", "x-ms-summary": "Error Status" }
+          }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    { "propertyName": "Website", "propertyValue": "https://ai.google.dev" },
+    { "propertyName": "Privacy policy", "propertyValue": "https://policies.google.com/privacy" },
+    { "propertyName": "Categories", "propertyValue": "AI;Productivity" }
+  ]
+}
