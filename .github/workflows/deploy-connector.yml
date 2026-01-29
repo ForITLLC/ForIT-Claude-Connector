@@ -126,6 +126,15 @@ jobs:
             --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
             --accept-cleartext-caching
 
+      - name: Get Connector ID
+        id: connector-id
+        run: |
+          if [ "${{ github.event.inputs.connector }}" == "gemini" ]; then
+            echo "id=${{ vars.GEMINI_CONNECTOR_ID }}" >> $GITHUB_OUTPUT
+          else
+            echo "id=${{ vars.CONNECTOR_ID }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy Connector
         run: |
           if [ "${{ github.event.inputs.action }}" == "create" ]; then
@@ -136,7 +145,7 @@ jobs:
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
-              --connector-id ${{ vars.CONNECTOR_ID }} \
+              --connector-id ${{ steps.connector-id.outputs.id }} \
               --api-definition-file ${{ steps.paths.outputs.definition }} \
               --api-properties-file ${{ steps.paths.outputs.properties }} \
               --script-file ${{ steps.paths.outputs.script }} \
