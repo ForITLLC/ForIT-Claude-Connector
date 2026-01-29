@@ -32,15 +32,30 @@ Power Platform custom connector for Anthropic's Claude API.
 ## Project Structure
 
 ```
-ForIT-Claude-Connector/
-├── claude-connector.json    # OpenAPI 2.0 definition (required for Power Platform)
-├── apiProperties.json       # Power Platform properties & API key auth config
-├── package.json            # Node.js for validation tests
-├── tests/
-│   └── validate-connector.js
+ForIT-AI-Connectors/
+├── connectors/
+│   ├── claude/
+│   │   ├── claude-connector.json    # OpenAPI 2.0 definition
+│   │   ├── apiProperties.json       # Power Platform properties
+│   │   ├── script.csx               # Request/response transforms
+│   │   ├── icon.png
+│   │   ├── package.json
+│   │   └── tests/
+│   │       └── validate-connector.js
+│   └── gemini/
+│       ├── gemini-connector.json    # OpenAPI 2.0 definition
+│       ├── apiProperties.json       # Power Platform properties
+│       ├── script.csx               # Request/response transforms
+│       ├── icon.png
+│       ├── package.json
+│       └── tests/
+│           └── validate-connector.js
+├── shared/                          # Future shared utilities
+├── docs/
+│   └── plans/
 ├── .github/workflows/
-│   ├── deploy-connector.yml  # CI/CD to 4 environments
-│   └── validate.yml          # PR validation
+│   ├── deploy-connector.yml         # CI/CD for all connectors
+│   └── validate.yml                 # PR validation
 └── README.md
 ```
 
@@ -54,8 +69,16 @@ ForIT-Claude-Connector/
 
 ## Deployment
 
+Deploy a specific connector:
+
 ```bash
-gh workflow run "Deploy Connector to Power Platform" -f environment=all -f action=create
+gh workflow run "Deploy Connector to Power Platform" -f connector=claude -f environment=development -f action=update
+```
+
+Deploy to all environments:
+
+```bash
+gh workflow run "Deploy Connector to Power Platform" -f connector=claude -f environment=all -f action=update
 ```
 
 ## Authentication
