@@ -1,0 +1,11 @@
+{
+  "name": "forit-gemini-connector",
+  "version": "1.0.0",
+  "description": "ForIT Gemini Connector validation tests",
+  "scripts": {
+    "test": "node tests/validate-connector.js"
+  },
+  "devDependencies": {
+    "ajv": "^8.12.0"
+  }
+}
