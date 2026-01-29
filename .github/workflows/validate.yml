@@ -1,51 +1,40 @@
-name: Validate Connector
+name: Validate PR
 
 on:
   pull_request:
-    branches: [main, master]
     paths:
-      - 'claude-connector.json'
-      - 'apiProperties.json'
-      - 'tests/**'
-
-  push:
-    branches: [main, master]
-    paths:
-      - 'claude-connector.json'
-      - 'apiProperties.json'
-      - 'tests/**'
+      - 'connectors/**'
 
 jobs:
   validate:
-    name: Validate Connector Definition
+    name: Validate Connectors
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        connector: [claude, gemini]
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check connector exists
+        id: check
+        run: |
+          if [ -d "connectors/${{ matrix.connector }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
+        if: steps.check.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run validation
-        run: npm test
-
-      - name: Check JSON formatting
+      - name: Install and test
+        if: steps.check.outputs.exists == 'true'
+        working-directory: connectors/${{ matrix.connector }}
         run: |
-          echo "Checking claude-connector.json..."
-          node -e "
-            const fs = require('fs');
-            const content = fs.readFileSync('claude-connector.json', 'utf8');
-            const parsed = JSON.parse(content);
-            const formatted = JSON.stringify(parsed, null, 2);
-            if (content.trim() !== formatted.trim()) {
-              console.log('JSON could be better formatted');
-            } else {
-              console.log('JSON is well formatted');
-            }
-          "
+          if [ -f "package.json" ]; then
+            npm ci
+            npm test
+          fi

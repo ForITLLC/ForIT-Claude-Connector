@@ -3,6 +3,14 @@ name: Deploy Connector to Power Platform
 on:
   workflow_dispatch:
     inputs:
+      connector:
+        description: 'Connector to deploy'
+        required: true
+        default: 'claude'
+        type: choice
+        options:
+          - claude
+          - gemini
       environment:
         description: 'Target environment'
         required: true
@@ -26,22 +34,38 @@ on:
   push:
     branches: [main, master]
     paths:
-      - 'claude-connector.json'
-      - 'apiProperties.json'
-      - 'script.csx'
-
-  release:
-    types: [published]
-
-env:
-  CONNECTOR_FILE: claude-connector.json
-  PROPERTIES_FILE: apiProperties.json
-  SCRIPT_FILE: script.csx
+      - 'connectors/**'
 
 jobs:
+  detect-changes:
+    name: Detect Changed Connectors
+    runs-on: ubuntu-latest
+    outputs:
+      claude_changed: ${{ steps.changes.outputs.claude }}
+      gemini_changed: ${{ steps.changes.outputs.gemini }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^connectors/claude/'; then
+            echo "claude=true" >> $GITHUB_OUTPUT
+          else
+            echo "claude=false" >> $GITHUB_OUTPUT
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q '^connectors/gemini/'; then
+            echo "gemini=true" >> $GITHUB_OUTPUT
+          else
+            echo "gemini=false" >> $GITHUB_OUTPUT
+          fi
+
   validate:
     name: Validate Connector
     runs-on: ubuntu-latest
+    needs: detect-changes
     steps:
       - uses: actions/checkout@v4
 
@@ -49,30 +73,46 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run validation tests
-        run: npm test
-
-      - name: Validate JSON syntax
+      - name: Validate Claude
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.connector == 'claude' || github.event_name == 'push' && needs.detect-changes.outputs.claude_changed == 'true'
+        working-directory: connectors/claude
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('${{ env.CONNECTOR_FILE }}'))"
-          echo "Valid JSON"
+          npm ci
+          npm test
 
-  deploy-dev:
-    name: Deploy to Development
+      - name: Validate Gemini
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.connector == 'gemini' || github.event_name == 'push' && needs.detect-changes.outputs.gemini_changed == 'true'
+        working-directory: connectors/gemini
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+            npm test
+          fi
+
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'development' || github.event.inputs.environment == 'all'))
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        environment: ${{ github.event.inputs.environment == 'all' && fromJson('["development", "production", "forit-default", "forit-portal"]') || fromJson(format('["{0}"]', github.event.inputs.environment)) }}
     environment:
-      name: development
+      name: ${{ matrix.environment }}
       url: ${{ vars.POWER_PLATFORM_URL }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set connector paths
+        id: paths
+        run: |
+          CONNECTOR="${{ github.event.inputs.connector }}"
+          echo "dir=connectors/${CONNECTOR}" >> $GITHUB_OUTPUT
+          echo "definition=connectors/${CONNECTOR}/${CONNECTOR}-connector.json" >> $GITHUB_OUTPUT
+          echo "properties=connectors/${CONNECTOR}/apiProperties.json" >> $GITHUB_OUTPUT
+          echo "script=connectors/${CONNECTOR}/script.csx" >> $GITHUB_OUTPUT
 
       - name: Install Power Platform CLI
         uses: microsoft/powerplatform-actions/actions-install@v1
@@ -90,181 +130,23 @@ jobs:
         run: |
           if [ "${{ github.event.inputs.action }}" == "create" ]; then
             $POWERPLATFORMTOOLS_PACPATH connector create \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
+              --api-definition-file ${{ steps.paths.outputs.definition }} \
+              --api-properties-file ${{ steps.paths.outputs.properties }} \
+              --script-file ${{ steps.paths.outputs.script }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           else
             $POWERPLATFORMTOOLS_PACPATH connector update \
               --connector-id ${{ vars.CONNECTOR_ID }} \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
+              --api-definition-file ${{ steps.paths.outputs.definition }} \
+              --api-properties-file ${{ steps.paths.outputs.properties }} \
+              --script-file ${{ steps.paths.outputs.script }} \
               --environment ${{ vars.POWER_PLATFORM_URL }}
           fi
 
       - name: Summary
         run: |
-          echo "## Development Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## ${{ matrix.environment }} Deployment Complete" >> $GITHUB_STEP_SUMMARY
           echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
-
-  deploy-prod:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'production' || github.event.inputs.environment == 'all'))
-    environment:
-      name: production
-      url: ${{ vars.POWER_PLATFORM_URL }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Power Platform CLI
-        uses: microsoft/powerplatform-actions/actions-install@v1
-
-      - name: Authenticate
-        run: |
-          $POWERPLATFORMTOOLS_PACPATH auth create \
-            --name deploy \
-            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
-            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
-            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
-            --accept-cleartext-caching
-
-      - name: Deploy Connector
-        run: |
-          if [ "${{ github.event.inputs.action }}" == "create" ]; then
-            $POWERPLATFORMTOOLS_PACPATH connector create \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          else
-            $POWERPLATFORMTOOLS_PACPATH connector update \
-              --connector-id ${{ vars.CONNECTOR_ID }} \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          fi
-
-      - name: Summary
-        run: |
-          echo "## Production Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
-
-  deploy-forit-default:
-    name: Deploy to ForIT Default
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'forit-default' || github.event.inputs.environment == 'all')
-    environment:
-      name: forit-default
-      url: ${{ vars.POWER_PLATFORM_URL }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Power Platform CLI
-        uses: microsoft/powerplatform-actions/actions-install@v1
-
-      - name: Authenticate
-        run: |
-          $POWERPLATFORMTOOLS_PACPATH auth create \
-            --name deploy \
-            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
-            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
-            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
-            --accept-cleartext-caching
-
-      - name: Deploy Connector
-        run: |
-          if [ "${{ github.event.inputs.action }}" == "create" ]; then
-            $POWERPLATFORMTOOLS_PACPATH connector create \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          else
-            $POWERPLATFORMTOOLS_PACPATH connector update \
-              --connector-id ${{ vars.CONNECTOR_ID }} \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          fi
-
-      - name: Summary
-        run: |
-          echo "## ForIT Default Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
-
-  deploy-forit-portal:
-    name: Deploy to ForIT Portal
-    runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'workflow_dispatch' && (github.event.inputs.environment == 'forit-portal' || github.event.inputs.environment == 'all')
-    environment:
-      name: forit-portal
-      url: ${{ vars.POWER_PLATFORM_URL }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Power Platform CLI
-        uses: microsoft/powerplatform-actions/actions-install@v1
-
-      - name: Authenticate
-        run: |
-          $POWERPLATFORMTOOLS_PACPATH auth create \
-            --name deploy \
-            --applicationId ${{ secrets.POWER_PLATFORM_APP_ID }} \
-            --clientSecret "${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}" \
-            --tenant ${{ secrets.POWER_PLATFORM_TENANT_ID }} \
-            --accept-cleartext-caching
-
-      - name: Deploy Connector
-        run: |
-          if [ "${{ github.event.inputs.action }}" == "create" ]; then
-            $POWERPLATFORMTOOLS_PACPATH connector create \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          else
-            $POWERPLATFORMTOOLS_PACPATH connector update \
-              --connector-id ${{ vars.CONNECTOR_ID }} \
-              --api-definition-file ${{ env.CONNECTOR_FILE }} \
-              --api-properties-file ${{ env.PROPERTIES_FILE }} \
-              --script-file ${{ env.SCRIPT_FILE }} \
-              --environment ${{ vars.POWER_PLATFORM_URL }}
-          fi
-
-      - name: Summary
-        run: |
-          echo "## ForIT Portal Deployment Complete" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Connector ID | ${{ vars.CONNECTOR_ID }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version | $(jq -r '.info.version' ${{ env.CONNECTOR_FILE }}) |" >> $GITHUB_STEP_SUMMARY
-
-  notify-failure:
-    name: Notify on Failure
-    runs-on: ubuntu-latest
-    needs: [deploy-dev, deploy-prod, deploy-forit-default, deploy-forit-portal]
-    if: failure()
-    steps:
-      - name: Log failure
-        run: |
-          echo "## Deployment Failed" >> $GITHUB_STEP_SUMMARY
-          echo "Check workflow logs for details." >> $GITHUB_STEP_SUMMARY
+          echo "| Connector | ${{ github.event.inputs.connector }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | $(jq -r '.info.version' ${{ steps.paths.outputs.definition }}) |" >> $GITHUB_STEP_SUMMARY
