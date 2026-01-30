@@ -37,13 +37,6 @@
             "x-ms-url-encoding": "single"
           },
           {
-            "name": "key",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "x-ms-visibility": "internal"
-          },
-          {
             "name": "body",
             "in": "body",
             "required": true,
@@ -112,13 +105,6 @@
             "default": "gemini-2.5-flash",
             "x-ms-summary": "Model",
             "x-ms-url-encoding": "single"
-          },
-          {
-            "name": "key",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "x-ms-visibility": "internal"
           },
           {
             "name": "body",
