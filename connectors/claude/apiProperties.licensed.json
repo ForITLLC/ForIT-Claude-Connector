@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "forit_license_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "ForIT License Key",
+          "description": "Your ForIT AI Connector license key from forit.io",
+          "tooltip": "Enter your ForIT license key",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 1
+          }
+        }
+      },
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "Anthropic API Key",
+          "description": "Your Anthropic API Key from console.anthropic.com",
+          "tooltip": "Enter your Anthropic API key",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 2
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#D4A27F",
+    "capabilities": [],
+    "publisher": "ForIT",
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set Anthropic Version Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "anthropic-version",
+          "x-ms-apimTemplateParameter.value": "2023-06-01",
+          "x-ms-apimTemplateParameter.existsAction": "skip",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set ForIT License Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-forit-license",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('forit_license_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      }
+    ],
+    "script": "script.csx",
+    "scriptOperations": ["AskClaude"]
+  }
+}

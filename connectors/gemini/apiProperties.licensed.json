@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "forit_license_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "ForIT License Key",
+          "description": "Your ForIT AI Connector license key from forit.io",
+          "tooltip": "Enter your ForIT license key",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 1
+          }
+        }
+      },
+      "gemini_api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "Gemini API Key",
+          "description": "Your Google Gemini API Key from aistudio.google.com",
+          "tooltip": "Enter your Gemini API key",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 2
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#4285F4",
+    "capabilities": [],
+    "publisher": "ForIT",
+    "script": "script.csx",
+    "scriptOperations": ["AskGemini"],
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set API Key Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-goog-api-key",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('gemini_api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      },
+      {
+        "templateId": "setheader",
+        "title": "Set ForIT License Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-forit-license",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('forit_license_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
+        }
+      }
+    ]
+  }
+}

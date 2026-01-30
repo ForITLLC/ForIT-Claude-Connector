@@ -31,6 +31,11 @@ on:
         options:
           - create
           - update
+      licensed:
+        description: 'Include ForIT license validation'
+        required: false
+        default: false
+        type: boolean
 
   push:
     branches: [main, master]
@@ -110,10 +115,16 @@ jobs:
         id: paths
         run: |
           CONNECTOR="${{ github.event.inputs.connector }}"
+          LICENSED="${{ github.event.inputs.licensed }}"
           echo "dir=connectors/${CONNECTOR}" >> $GITHUB_OUTPUT
           echo "definition=connectors/${CONNECTOR}/${CONNECTOR}-connector.json" >> $GITHUB_OUTPUT
-          echo "properties=connectors/${CONNECTOR}/apiProperties.json" >> $GITHUB_OUTPUT
+          if [ "$LICENSED" == "true" ]; then
+            echo "properties=connectors/${CONNECTOR}/apiProperties.licensed.json" >> $GITHUB_OUTPUT
+          else
+            echo "properties=connectors/${CONNECTOR}/apiProperties.json" >> $GITHUB_OUTPUT
+          fi
           echo "script=connectors/${CONNECTOR}/script.csx" >> $GITHUB_OUTPUT
+          echo "licensed=${LICENSED}" >> $GITHUB_OUTPUT
 
       - name: Install Power Platform CLI
         uses: microsoft/powerplatform-actions/actions-install@v1
@@ -160,3 +171,4 @@ jobs:
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Connector | ${{ github.event.inputs.connector }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | $(jq -r '.info.version' ${{ steps.paths.outputs.definition }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Licensed | ${{ steps.paths.outputs.licensed }} |" >> $GITHUB_STEP_SUMMARY
