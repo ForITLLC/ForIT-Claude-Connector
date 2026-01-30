@@ -21,6 +21,7 @@ on:
           - production
           - forit-default
           - forit-portal
+          - pivot
           - all
       action:
         description: 'Deployment action'
@@ -97,7 +98,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
-        environment: ${{ github.event.inputs.environment == 'all' && fromJson('["development", "production", "forit-default", "forit-portal"]') || fromJson(format('["{0}"]', github.event.inputs.environment)) }}
+        environment: ${{ github.event.inputs.environment == 'all' && fromJson('["development", "production", "forit-default", "forit-portal", "pivot"]') || fromJson(format('["{0}"]', github.event.inputs.environment)) }}
     environment:
       name: ${{ matrix.environment }}
       url: ${{ vars.POWER_PLATFORM_URL }}
