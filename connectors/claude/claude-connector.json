@@ -71,6 +71,20 @@
                   "description": "Your question for Claude",
                   "x-ms-summary": "Prompt"
                 },
+                "attachment": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "File content (base64) - images only (PNG, JPEG, GIF, WebP)",
+                  "x-ms-summary": "Attachment",
+                  "x-ms-visibility": "advanced"
+                },
+                "attachment_type": {
+                  "type": "string",
+                  "description": "MIME type of attachment",
+                  "x-ms-summary": "Attachment Type",
+                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp"],
+                  "x-ms-visibility": "advanced"
+                },
                 "system": {
                   "type": "string",
                   "description": "Leave empty for text, or set for JSON",

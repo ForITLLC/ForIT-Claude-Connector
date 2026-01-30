@@ -40,19 +40,53 @@ public class Script : ScriptBase
         if (body["prompt"] != null)
         {
             var prompt = body["prompt"].ToString();
+            var attachment = body["attachment"]?.ToString();
+            var attachmentType = body["attachment_type"]?.ToString();
 
-            // Create messages array from simple prompt
+            // Build content - either string or array with image
+            object content;
+            if (!string.IsNullOrEmpty(attachment) && !string.IsNullOrEmpty(attachmentType))
+            {
+                // Multimodal content with image
+                content = new JArray
+                {
+                    new JObject
+                    {
+                        ["type"] = "image",
+                        ["source"] = new JObject
+                        {
+                            ["type"] = "base64",
+                            ["media_type"] = attachmentType,
+                            ["data"] = attachment
+                        }
+                    },
+                    new JObject
+                    {
+                        ["type"] = "text",
+                        ["text"] = prompt
+                    }
+                };
+            }
+            else
+            {
+                // Text-only content
+                content = prompt;
+            }
+
+            // Create messages array
             var messages = new JArray
             {
                 new JObject
                 {
                     ["role"] = "user",
-                    ["content"] = prompt
+                    ["content"] = content
                 }
             };
 
             // Replace prompt with messages array
             body.Remove("prompt");
+            body.Remove("attachment");
+            body.Remove("attachment_type");
             body["messages"] = messages;
         }
 

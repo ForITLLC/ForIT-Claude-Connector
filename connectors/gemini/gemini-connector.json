@@ -49,6 +49,20 @@
                   "description": "Your question for Gemini",
                   "x-ms-summary": "Prompt"
                 },
+                "attachment": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "File content (base64) - images, PDFs, etc.",
+                  "x-ms-summary": "Attachment",
+                  "x-ms-visibility": "advanced"
+                },
+                "attachment_type": {
+                  "type": "string",
+                  "description": "MIME type of attachment (e.g., image/png, application/pdf)",
+                  "x-ms-summary": "Attachment Type",
+                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"],
+                  "x-ms-visibility": "advanced"
+                },
                 "output_format": {
                   "type": "string",
                   "description": "Response format",

@@ -41,23 +41,40 @@ public class Script : ScriptBase
         {
             var prompt = body["prompt"].ToString();
             var outputFormat = body["output_format"]?.ToString() ?? "text";
+            var attachment = body["attachment"]?.ToString();
+            var attachmentType = body["attachment_type"]?.ToString();
 
-            // Create contents array from simple prompt
+            // Build parts array
+            var parts = new JArray { new JObject { ["text"] = prompt } };
+
+            // Add attachment if provided
+            if (!string.IsNullOrEmpty(attachment) && !string.IsNullOrEmpty(attachmentType))
+            {
+                parts.Add(new JObject
+                {
+                    ["inline_data"] = new JObject
+                    {
+                        ["mime_type"] = attachmentType,
+                        ["data"] = attachment
+                    }
+                });
+            }
+
+            // Create contents array
             var contents = new JArray
             {
                 new JObject
                 {
                     ["role"] = "user",
-                    ["parts"] = new JArray
-                    {
-                        new JObject { ["text"] = prompt }
-                    }
+                    ["parts"] = parts
                 }
             };
 
             // Remove our custom fields
             body.Remove("prompt");
             body.Remove("output_format");
+            body.Remove("attachment");
+            body.Remove("attachment_type");
 
             // Set contents
             body["contents"] = contents;
