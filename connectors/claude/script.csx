@@ -44,7 +44,7 @@ public class Script : ScriptBase
             var attachmentType = body["attachment_type"]?.ToString();
 
             // Build content - either string or array with image
-            object content;
+            JToken content;
             if (!string.IsNullOrEmpty(attachment) && !string.IsNullOrEmpty(attachmentType))
             {
                 // Multimodal content with image
@@ -70,7 +70,7 @@ public class Script : ScriptBase
             else
             {
                 // Text-only content
-                content = prompt;
+                content = new JValue(prompt);
             }
 
             // Create messages array
