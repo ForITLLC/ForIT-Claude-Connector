@@ -23,7 +23,8 @@
         "parameters": {
           "x-ms-apimTemplateParameter.name": "x-forit-license",
           "x-ms-apimTemplateParameter.value": "@connectionParameters('api_key')",
-          "x-ms-apimTemplateParameter.existsAction": "override"
+          "x-ms-apimTemplateParameter.existsAction": "override",
+          "x-ms-apimTemplate-policySection": "Request"
         }
       }
     ],
