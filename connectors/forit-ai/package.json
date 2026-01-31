@@ -1,0 +1,8 @@
+{
+  "name": "forit-ai-connector",
+  "version": "1.0.0",
+  "description": "ForIT AI unified connector for Power Platform",
+  "scripts": {
+    "test": "node tests/validate-connector.js"
+  }
+}

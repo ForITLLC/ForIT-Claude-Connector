@@ -1,0 +1,369 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ForIT AI",
+    "description": "Unified AI connector supporting Claude, Gemini, and more through ForIT SaaS. One connection, multiple AI providers.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ForIT Support",
+      "url": "https://forit.io",
+      "email": "support@forit.io"
+    }
+  },
+  "host": "ai.forit.io",
+  "basePath": "/api",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "api_key": {
+      "type": "apiKey",
+      "name": "x-forit-license",
+      "in": "header",
+      "description": "ForIT license key from forit.io"
+    }
+  },
+  "security": [{ "api_key": [] }],
+  "paths": {
+    "/ask": {
+      "post": {
+        "operationId": "AskAI",
+        "summary": "Ask AI",
+        "description": "Send a prompt to AI. Automatically selects the best provider or specify one.",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["prompt"],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question or prompt for the AI",
+                  "x-ms-summary": "Prompt",
+                  "x-ms-visibility": "important"
+                },
+                "provider": {
+                  "type": "string",
+                  "description": "AI provider to use",
+                  "x-ms-summary": "Provider",
+                  "x-ms-visibility": "advanced",
+                  "default": "auto",
+                  "enum": ["auto", "claude", "gemini"]
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Specific model (optional, uses provider default if not specified)",
+                  "x-ms-summary": "Model",
+                  "x-ms-visibility": "advanced"
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "Maximum tokens in response",
+                  "x-ms-summary": "Max Tokens",
+                  "x-ms-visibility": "advanced",
+                  "default": 4096
+                },
+                "attachment": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "File attachment (base64 encoded)",
+                  "x-ms-summary": "Attachment",
+                  "x-ms-visibility": "advanced"
+                },
+                "attachment_type": {
+                  "type": "string",
+                  "description": "MIME type of attachment",
+                  "x-ms-summary": "Attachment Type",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "type": "string",
+                  "description": "AI response text",
+                  "x-ms-summary": "Response"
+                },
+                "provider": {
+                  "type": "string",
+                  "description": "Provider that handled the request",
+                  "x-ms-summary": "Provider Used"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Model that generated the response",
+                  "x-ms-summary": "Model Used"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or expired license key"
+          },
+          "402": {
+            "description": "Payment required - license quota exceeded"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/claude/messages": {
+      "post": {
+        "operationId": "AskClaude",
+        "summary": "Ask Claude",
+        "description": "Send a prompt directly to Claude (Anthropic)",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["prompt"],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question or prompt",
+                  "x-ms-summary": "Prompt",
+                  "x-ms-visibility": "important"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Claude model to use",
+                  "x-ms-summary": "Model",
+                  "default": "claude-sonnet-4-5-20250929",
+                  "enum": ["claude-sonnet-4-5-20250929", "claude-opus-4-5-20251101"]
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "Maximum tokens in response",
+                  "x-ms-summary": "Max Tokens",
+                  "x-ms-visibility": "advanced",
+                  "default": 4096
+                },
+                "enable_thinking": {
+                  "type": "boolean",
+                  "description": "Enable extended thinking mode",
+                  "x-ms-summary": "Enable Thinking",
+                  "x-ms-visibility": "advanced",
+                  "default": false
+                },
+                "thinking_budget": {
+                  "type": "integer",
+                  "description": "Token budget for thinking (requires Enable Thinking)",
+                  "x-ms-summary": "Thinking Budget",
+                  "x-ms-visibility": "advanced",
+                  "default": 10000
+                },
+                "attachment": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "Image attachment (base64)",
+                  "x-ms-summary": "Attachment",
+                  "x-ms-visibility": "advanced"
+                },
+                "attachment_type": {
+                  "type": "string",
+                  "description": "Image MIME type",
+                  "x-ms-summary": "Attachment Type",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "type": "string",
+                  "description": "Claude's response",
+                  "x-ms-summary": "Response"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Model used",
+                  "x-ms-summary": "Model"
+                },
+                "thinking": {
+                  "type": "string",
+                  "description": "Thinking process (if enabled)",
+                  "x-ms-summary": "Thinking"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "402": { "description": "Payment required" },
+          "429": { "description": "Rate limited" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/gemini/generate": {
+      "post": {
+        "operationId": "AskGemini",
+        "summary": "Ask Gemini",
+        "description": "Send a prompt directly to Gemini (Google)",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["prompt"],
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "Your question or prompt",
+                  "x-ms-summary": "Prompt",
+                  "x-ms-visibility": "important"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Gemini model to use",
+                  "x-ms-summary": "Model",
+                  "default": "gemini-2.0-flash",
+                  "enum": ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro"]
+                },
+                "max_tokens": {
+                  "type": "integer",
+                  "description": "Maximum tokens in response",
+                  "x-ms-summary": "Max Tokens",
+                  "x-ms-visibility": "advanced",
+                  "default": 4096
+                },
+                "attachment": {
+                  "type": "string",
+                  "format": "byte",
+                  "description": "File attachment (base64)",
+                  "x-ms-summary": "Attachment",
+                  "x-ms-visibility": "advanced"
+                },
+                "attachment_type": {
+                  "type": "string",
+                  "description": "File MIME type",
+                  "x-ms-summary": "Attachment Type",
+                  "x-ms-visibility": "advanced",
+                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "response": {
+                  "type": "string",
+                  "description": "Gemini's response",
+                  "x-ms-summary": "Response"
+                },
+                "model": {
+                  "type": "string",
+                  "description": "Model used",
+                  "x-ms-summary": "Model"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "402": { "description": "Payment required" },
+          "429": { "description": "Rate limited" },
+          "500": { "description": "Server error" }
+        }
+      }
+    },
+    "/license/status": {
+      "get": {
+        "operationId": "GetLicenseStatus",
+        "summary": "Get License Status",
+        "description": "Check your ForIT AI license status and usage",
+        "x-ms-visibility": "advanced",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "License status",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "valid": {
+                  "type": "boolean",
+                  "description": "License is valid",
+                  "x-ms-summary": "Valid"
+                },
+                "tier": {
+                  "type": "string",
+                  "description": "License tier (free, pro, enterprise)",
+                  "x-ms-summary": "Tier"
+                },
+                "requests_used": {
+                  "type": "integer",
+                  "description": "Requests used this period",
+                  "x-ms-summary": "Requests Used"
+                },
+                "requests_limit": {
+                  "type": "integer",
+                  "description": "Request limit for your tier",
+                  "x-ms-summary": "Request Limit"
+                },
+                "expires_at": {
+                  "type": "string",
+                  "description": "License expiration date",
+                  "x-ms-summary": "Expires"
+                }
+              }
+            }
+          },
+          "401": { "description": "Invalid license key" }
+        }
+      }
+    }
+  },
+  "x-ms-connector-metadata": [
+    {
+      "propertyName": "Website",
+      "propertyValue": "https://forit.io"
+    },
+    {
+      "propertyName": "Privacy policy",
+      "propertyValue": "https://forit.io/privacy"
+    },
+    {
+      "propertyName": "Categories",
+      "propertyValue": "AI;Business Intelligence"
+    }
+  ]
+}

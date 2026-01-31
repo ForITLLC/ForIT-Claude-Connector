@@ -11,6 +11,7 @@ on:
         options:
           - claude
           - gemini
+          - forit-ai
       environment:
         description: 'Target environment'
         required: true
@@ -49,6 +50,7 @@ jobs:
     outputs:
       claude_changed: ${{ steps.changes.outputs.claude }}
       gemini_changed: ${{ steps.changes.outputs.gemini }}
+      forit_ai_changed: ${{ steps.changes.outputs.forit_ai }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,6 +68,11 @@ jobs:
             echo "gemini=true" >> $GITHUB_OUTPUT
           else
             echo "gemini=false" >> $GITHUB_OUTPUT
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q '^connectors/forit-ai/'; then
+            echo "forit_ai=true" >> $GITHUB_OUTPUT
+          else
+            echo "forit_ai=false" >> $GITHUB_OUTPUT
           fi
 
   validate:
@@ -90,6 +97,15 @@ jobs:
       - name: Validate Gemini
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.connector == 'gemini' || github.event_name == 'push' && needs.detect-changes.outputs.gemini_changed == 'true'
         working-directory: connectors/gemini
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+            npm test
+          fi
+
+      - name: Validate ForIT AI
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.connector == 'forit-ai' || github.event_name == 'push' && needs.detect-changes.outputs.forit_ai_changed == 'true'
+        working-directory: connectors/forit-ai
         run: |
           if [ -f "package.json" ]; then
             npm ci
@@ -141,8 +157,11 @@ jobs:
       - name: Get Connector ID
         id: connector-id
         run: |
-          if [ "${{ github.event.inputs.connector }}" == "gemini" ]; then
+          CONNECTOR="${{ github.event.inputs.connector }}"
+          if [ "$CONNECTOR" == "gemini" ]; then
             echo "id=${{ vars.GEMINI_CONNECTOR_ID }}" >> $GITHUB_OUTPUT
+          elif [ "$CONNECTOR" == "forit-ai" ]; then
+            echo "id=${{ vars.FORIT_AI_CONNECTOR_ID }}" >> $GITHUB_OUTPUT
           else
             echo "id=${{ vars.CONNECTOR_ID }}" >> $GITHUB_OUTPUT
           fi

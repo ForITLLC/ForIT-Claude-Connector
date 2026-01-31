@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "connectionParameters": {
+      "api_key": {
+        "type": "securestring",
+        "uiDefinition": {
+          "displayName": "ForIT License Key",
+          "description": "Your ForIT AI license key from forit.io",
+          "tooltip": "Enter your ForIT license key. Get one at https://forit.io/ai",
+          "constraints": {
+            "required": "true",
+            "tabIndex": 1
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#00A67E",
+    "capabilities": [],
+    "policyTemplateInstances": [
+      {
+        "templateId": "setheader",
+        "title": "Set License Header",
+        "parameters": {
+          "x-ms-apimTemplateParameter.name": "x-forit-license",
+          "x-ms-apimTemplateParameter.value": "@connectionParameters('api_key')",
+          "x-ms-apimTemplateParameter.existsAction": "override"
+        }
+      }
+    ],
+    "publisher": "ForIT",
+    "stackOwner": "ForIT"
+  }
+}
