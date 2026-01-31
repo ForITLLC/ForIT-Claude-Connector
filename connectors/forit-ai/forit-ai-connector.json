@@ -237,8 +237,8 @@
                   "type": "string",
                   "description": "Gemini model to use",
                   "x-ms-summary": "Model",
-                  "default": "gemini-2.0-flash",
-                  "enum": ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-pro"]
+                  "default": "gemini-2.5-pro",
+                  "enum": ["gemini-2.5-pro", "gemini-2.5-flash"]
                 },
                 "max_tokens": {
                   "type": "integer",
