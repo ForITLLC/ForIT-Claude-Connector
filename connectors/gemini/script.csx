@@ -42,22 +42,25 @@ public class Script : ScriptBase
             var prompt = body["prompt"].ToString();
             var outputFormat = body["output_format"]?.ToString() ?? "text";
             var attachment = body["attachment"]?.ToString();
-            var attachmentType = body["attachment_type"]?.ToString();
 
             // Build parts array
             var parts = new JArray { new JObject { ["text"] = prompt } };
 
-            // Add attachment if provided
-            if (!string.IsNullOrEmpty(attachment) && !string.IsNullOrEmpty(attachmentType))
+            // Add attachment if provided (auto-detect type)
+            if (!string.IsNullOrEmpty(attachment))
             {
-                parts.Add(new JObject
+                var mimeType = InferMediaType(attachment);
+                if (!string.IsNullOrEmpty(mimeType))
                 {
-                    ["inline_data"] = new JObject
+                    parts.Add(new JObject
                     {
-                        ["mime_type"] = attachmentType,
-                        ["data"] = attachment
-                    }
-                });
+                        ["inline_data"] = new JObject
+                        {
+                            ["mime_type"] = mimeType,
+                            ["data"] = attachment
+                        }
+                    });
+                }
             }
 
             // Create contents array
@@ -74,7 +77,6 @@ public class Script : ScriptBase
             body.Remove("prompt");
             body.Remove("output_format");
             body.Remove("attachment");
-            body.Remove("attachment_type");
 
             // Set contents
             body["contents"] = contents;
@@ -138,5 +140,19 @@ public class Script : ScriptBase
         }
 
         return response;
+    }
+
+    private string InferMediaType(string base64)
+    {
+        if (string.IsNullOrEmpty(base64)) return null;
+
+        // Detect from base64 magic bytes
+        if (base64.StartsWith("iVBORw0KGgo")) return "image/png";
+        if (base64.StartsWith("/9j/")) return "image/jpeg";
+        if (base64.StartsWith("R0lGOD")) return "image/gif";
+        if (base64.StartsWith("UklGR")) return "image/webp";
+        if (base64.StartsWith("JVBERi")) return "application/pdf";
+
+        return null;
     }
 }

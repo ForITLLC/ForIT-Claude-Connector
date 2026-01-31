@@ -70,16 +70,9 @@
                 "attachment": {
                   "type": "string",
                   "format": "byte",
-                  "description": "File attachment (base64 encoded)",
+                  "description": "File content (base64) - auto-detects PNG, JPEG, GIF, WebP, PDF",
                   "x-ms-summary": "Attachment",
                   "x-ms-visibility": "advanced"
-                },
-                "attachment_type": {
-                  "type": "string",
-                  "description": "MIME type of attachment",
-                  "x-ms-summary": "Attachment Type",
-                  "x-ms-visibility": "advanced",
-                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"]
                 }
               }
             }
@@ -179,16 +172,9 @@
                 "attachment": {
                   "type": "string",
                   "format": "byte",
-                  "description": "Image attachment (base64)",
+                  "description": "Image content (base64) - auto-detects PNG, JPEG, GIF, WebP",
                   "x-ms-summary": "Attachment",
                   "x-ms-visibility": "advanced"
-                },
-                "attachment_type": {
-                  "type": "string",
-                  "description": "Image MIME type",
-                  "x-ms-summary": "Attachment Type",
-                  "x-ms-visibility": "advanced",
-                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp"]
                 }
               }
             }
@@ -264,16 +250,9 @@
                 "attachment": {
                   "type": "string",
                   "format": "byte",
-                  "description": "File attachment (base64)",
+                  "description": "File content (base64) - auto-detects PNG, JPEG, GIF, WebP, PDF",
                   "x-ms-summary": "Attachment",
                   "x-ms-visibility": "advanced"
-                },
-                "attachment_type": {
-                  "type": "string",
-                  "description": "File MIME type",
-                  "x-ms-summary": "Attachment Type",
-                  "x-ms-visibility": "advanced",
-                  "enum": ["image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"]
                 }
               }
             }

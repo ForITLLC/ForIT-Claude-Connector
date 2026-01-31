@@ -41,31 +41,41 @@ public class Script : ScriptBase
         {
             var prompt = body["prompt"].ToString();
             var attachment = body["attachment"]?.ToString();
-            var attachmentType = body["attachment_type"]?.ToString();
 
             // Build content - either string or array with image
             JToken content;
-            if (!string.IsNullOrEmpty(attachment) && !string.IsNullOrEmpty(attachmentType))
+            if (!string.IsNullOrEmpty(attachment))
             {
-                // Multimodal content with image
-                content = new JArray
+                // Auto-detect content type from base64 magic bytes
+                var mediaType = InferMediaType(attachment);
+
+                if (!string.IsNullOrEmpty(mediaType))
                 {
-                    new JObject
+                    // Multimodal content with image
+                    content = new JArray
                     {
-                        ["type"] = "image",
-                        ["source"] = new JObject
+                        new JObject
                         {
-                            ["type"] = "base64",
-                            ["media_type"] = attachmentType,
-                            ["data"] = attachment
+                            ["type"] = "image",
+                            ["source"] = new JObject
+                            {
+                                ["type"] = "base64",
+                                ["media_type"] = mediaType,
+                                ["data"] = attachment
+                            }
+                        },
+                        new JObject
+                        {
+                            ["type"] = "text",
+                            ["text"] = prompt
                         }
-                    },
-                    new JObject
-                    {
-                        ["type"] = "text",
-                        ["text"] = prompt
-                    }
-                };
+                    };
+                }
+                else
+                {
+                    // Unsupported type, send text only
+                    content = new JValue(prompt);
+                }
             }
             else
             {
@@ -86,7 +96,6 @@ public class Script : ScriptBase
             // Replace prompt with messages array
             body.Remove("prompt");
             body.Remove("attachment");
-            body.Remove("attachment_type");
             body["messages"] = messages;
         }
 
@@ -161,5 +170,18 @@ public class Script : ScriptBase
         }
 
         return response;
+    }
+
+    private string InferMediaType(string base64)
+    {
+        if (string.IsNullOrEmpty(base64)) return null;
+
+        // Detect from base64 magic bytes
+        if (base64.StartsWith("iVBORw0KGgo")) return "image/png";
+        if (base64.StartsWith("/9j/")) return "image/jpeg";
+        if (base64.StartsWith("R0lGOD")) return "image/gif";
+        if (base64.StartsWith("UklGR")) return "image/webp";
+
+        return null;
     }
 }
