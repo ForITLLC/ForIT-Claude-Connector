@@ -458,7 +458,11 @@
                 "has_more": { "type": "boolean", "x-ms-summary": "Has More" }
               }
             }
-          }
+          },
+          "400": { "description": "Bad request", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "401": { "description": "Invalid API key", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "429": { "description": "Rate limited", "schema": { "$ref": "#/definitions/ErrorResponse" } },
+          "500": { "description": "Server error", "schema": { "$ref": "#/definitions/ErrorResponse" } }
         }
       }
     },
